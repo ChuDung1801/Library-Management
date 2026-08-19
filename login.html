@@ -232,8 +232,8 @@
       <button type="button" class="btn-secondary">Request Institutional Access</button>
 
       <div class="demo-hint">
-        Tài khoản demo: <b>jdoe@institution.edu</b> / mật khẩu <b>library2024</b><br>
-        hoặc <b>admin</b> / <b>admin123</b>
+        Tài khoản Admin: <b>admin</b> / <b>admin123</b><br>
+        Tài khoản Người dùng: <b>user</b> / <b>user123</b>
       </div>
     </div>
   </div>
@@ -243,8 +243,10 @@
 <script>
   // Danh sách tài khoản demo
   const ACCOUNTS = [
-    { id: "jdoe@institution.edu", pw: "library2024", name: "Jane Doe" },
-    { id: "admin", pw: "admin123", name: "Admin" }
+    { id: "jdoe@institution.edu", pw: "library2024", name: "Jane Doe", role: "admin", redirect: "home.html" },
+    { id: "admin", pw: "admin123", name: "Admin", role: "admin", redirect: "home.html" },
+    { id: "student@scholaris.edu", pw: "student2024", name: "Minh Anh", role: "user", redirect: "catalog.html" },
+    { id: "user", pw: "user123", name: "Người dùng", role: "user", redirect: "catalog.html" }
   ];
 
   const loginForm = document.getElementById('loginForm');
@@ -264,9 +266,9 @@
 
     if (account) {
       loginError.classList.remove('show');
-      // Lưu phiên đăng nhập tạm để home.html hiển thị tên + chặn truy cập trực tiếp
-      sessionStorage.setItem('scholaris_user', JSON.stringify({ name: account.name }));
-      window.location.href = 'home.html';
+      // Lưu phiên đăng nhập tạm để home.html/catalog.html hiển thị tên + chặn truy cập trực tiếp
+      sessionStorage.setItem('scholaris_user', JSON.stringify({ name: account.name, role: account.role }));
+      window.location.href = account.redirect;
     } else {
       loginError.classList.add('show');
     }

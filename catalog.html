@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;
+    --surface-container-lowest:#ffffff;
+    --surface-container-low:#f2f4f6;
+    --surface-container:#eceef0;
+    --surface-container-high:#e6e8ea;
+    --on-surface:#191c1e;
+    --on-surface-variant:#43474e;
+    --outline:#74777f;
+    --outline-variant:#c4c6cf;
+    --primary-deep:#002045;
+    --primary:#1a365d;
+    --secondary:#2b6cb0;
+    --secondary-container:#7db6ff;
+    --error:#ba1a1a;
+    --success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Manrope', sans-serif;
+    background:var(--surface);
+    color:var(--on-surface);
+  }
+  #toast{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);
+    background:var(--success-container);color:#14532d;
+    padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;
+    box-shadow:0 10px 25px -8px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:all .25s;
+    z-index:999;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Header */
+  header{
+    background:var(--surface-container-lowest);
+    border-bottom:1px solid var(--outline-variant);
+    padding:16px 48px;
+    display:flex;align-items:center;gap:32px;
+  }
+  .brand{font-size:22px;font-weight:700;color:var(--primary-deep);display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  nav{display:flex;gap:28px;flex:1;}
+  nav a{
+    text-decoration:none;color:var(--on-surface-variant);font-weight:600;font-size:15px;
+    padding-bottom:4px;border-bottom:2px solid transparent;
+  }
+  nav a.active{color:var(--primary-deep);border-color:var(--primary-deep);}
+  .header-right{display:flex;align-items:center;gap:18px;}
+  .search-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-container-low);
+    border:1px solid var(--outline-variant);
+    border-radius:9999px;padding:9px 16px;
+    width:260px;color:var(--outline);
+  }
+  .search-box input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;flex:1;color:var(--on-surface);}
+  .icon-btn{
+    width:38px;height:38px;border-radius:9999px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--primary-deep);cursor:pointer;background:none;border:none;font-size:17px;
+  }
+  .avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--secondary);color:#fff;font-weight:700;
+    display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;
+  }
+
+  /* Layout */
+  .layout{display:flex;gap:24px;padding:32px 48px;max-width:1400px;margin:0 auto;align-items:flex-start;}
+  .filters{
+    width:280px;flex-shrink:0;
+    background:var(--surface-container-lowest);
+    border-radius:1.5rem;padding:24px;
+    border:1px solid var(--outline-variant);
+  }
+  .filters-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .filters-head h3{margin:0;font-size:22px;color:var(--on-surface);}
+  .filters-head a{color:var(--secondary);font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;}
+  .filter-group{margin-bottom:22px;}
+  .filter-group:last-child{margin-bottom:0;}
+  .filter-label{font-size:12px;font-weight:700;color:var(--outline);letter-spacing:.05em;margin-bottom:10px;}
+  .check-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 0;font-size:15px;color:var(--on-surface);cursor:pointer;
+  }
+  .check-row .left{display:flex;align-items:center;gap:10px;}
+  .check-row .count{color:var(--outline);font-size:14px;}
+  .checkbox{
+    width:18px;height:18px;border-radius:0.25rem;border:1.5px solid var(--outline-variant);
+    cursor:pointer;appearance:none;-webkit-appearance:none;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    background:var(--surface-container-lowest);
+  }
+  .checkbox:checked{background:var(--secondary);border-color:var(--secondary);}
+  .checkbox:checked::after{content:"✓";color:white;font-size:12px;font-weight:700;}
+  hr.sep{border:none;border-top:1px solid var(--outline-variant);margin:18px 0;}
+  select{
+    width:100%;padding:10px 12px;border-radius:1rem;border:1px solid var(--outline-variant);
+    background:var(--surface-container-lowest);font-family:inherit;font-size:14px;color:var(--on-surface);
+  }
+
+  .content{flex:1;}
+  .content-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;gap:20px;}
+  h1.page-title{font-size:44px;font-weight:700;margin:4px 0 6px;color:var(--primary-deep);}
+  .results-count{color:var(--on-surface-variant);font-size:15px;margin:0 0 24px;}
+  .results-count b{color:var(--on-surface);}
+  .sort-box{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--on-surface-variant);}
+  .sort-box select{width:auto;padding:8px 14px;font-weight:600;color:var(--on-surface);}
+
+  .book-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .book-card{
+    background:var(--surface-container-lowest);
+    border:1px solid var(--outline-variant);
+    border-radius:1.5rem;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .book-cover{
+    position:relative;aspect-ratio:16/11;
+    background:linear-gradient(135deg,var(--primary-deep),var(--secondary));
+    display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,0.92);font-weight:700;font-size:16px;text-align:center;padding:16px;
+  }
+  .cover-tag{
+    position:absolute;top:12px;left:12px;
+    background:rgba(255,255,255,0.9);color:var(--primary-deep);
+    font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:4px 10px;border-radius:0.5rem;
+  }
+  .bookmark-btn{
+    position:absolute;top:10px;right:10px;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(255,255,255,0.9);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;color:var(--primary-deep);
+  }
+  .bookmark-btn.active{color:#fff;background:var(--secondary);}
+  .book-info{padding:18px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .book-title{font-size:16px;font-weight:700;color:var(--on-surface);line-height:1.3;}
+  .book-author{font-size:14px;color:var(--on-surface-variant);margin-bottom:4px;}
+  .book-status{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--on-surface-variant);margin-bottom:8px;}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot.available{background:var(--secondary);}
+  .dot.borrowed{background:var(--error);}
+  .btn-view{
+    margin-top:auto;
+    padding:10px;border-radius:1rem;
+    background:transparent;color:var(--primary-deep);
+    border:1.5px solid var(--primary-deep);
+    font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .btn-view:hover{background:var(--surface-container-low);}
+
+  .pagination-row{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:32px;padding-top:20px;border-top:1px solid var(--outline-variant);
+    color:var(--on-surface-variant);font-size:14px;
+  }
+  .pages{display:flex;gap:6px;align-items:center;}
+  .page-btn{
+    width:34px;height:34px;border-radius:0.6rem;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--outline-variant);background:var(--surface-container-lowest);
+    color:var(--on-surface);font-weight:600;font-size:14px;cursor:pointer;
+  }
+  .page-btn.active{background:var(--primary-deep);color:#fff;border-color:var(--primary-deep);}
+  .page-btn.dots{border:none;background:none;cursor:default;}
+
+  footer{
+    background:var(--surface-container-high);
+    padding:32px 48px;margin-top:40px;
+    display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;
+  }
+  footer .f-brand{font-size:20px;font-weight:700;color:var(--on-surface);margin-bottom:6px;}
+  footer .f-copy{font-size:13px;color:var(--outline);}
+  footer .f-links{display:flex;gap:24px;flex-wrap:wrap;}
+  footer .f-links a{color:var(--on-surface-variant);text-decoration:none;font-size:14px;font-weight:600;}
+
+  @media (max-width: 900px){
+    header{flex-wrap:wrap;padding:16px 20px;}
+    nav{order:3;width:100%;overflow-x:auto;}
+    .search-box{width:180px;}
+    .layout{flex-direction:column;padding:20px;}
+    .filters{width:100%;}
+    .book-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width: 560px){
+    .book-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    Scholaris Library
+  </div>
+  <nav>
+    <a href="catalog.html" class="active">Catalog</a>
+    <a href="#">Reserves</a>
+    <a href="#">Journals</a>
+    <a href="#">Digital Collection</a>
+  </nav>
+  <div class="header-right">
+    <div class="search-box">🔍<input type="text" placeholder="Search catalog..."></div>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🔖</button>
+    <div class="avatar" id="userAvatar" title="Đăng xuất">U</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="filters">
+    <div class="filters-head"><h3>Filters</h3><a id="clearFilters">Clear All</a></div>
+
+    <div class="filter-group">
+      <div class="filter-label">CATEGORY</div>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox" checked> Science</span><span class="count">124</span></label>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox"> Art & Design</span><span class="count">89</span></label>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox" checked> History</span><span class="count">215</span></label>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox"> Technology</span><span class="count">156</span></label>
+    </div>
+
+    <hr class="sep">
+
+    <div class="filter-group">
+      <div class="filter-label">AVAILABILITY</div>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox"> In Stock</span></label>
+      <label class="check-row"><span class="left"><input type="checkbox" class="checkbox"> Currently Borrowed</span></label>
+    </div>
+
+    <hr class="sep">
+
+    <div class="filter-group">
+      <div class="filter-label">LANGUAGE</div>
+      <select>
+        <option>All Languages</option>
+        <option>English</option>
+        <option>Vietnamese</option>
+      </select>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="content-top">
+      <div>
+        <h1 class="page-title">Catalog</h1>
+        <p class="results-count">Showing 1-12 of <b>339</b> results for "<b>Science, History</b>"</p>
+      </div>
+      <div class="sort-box">
+        Sort by:
+        <select>
+          <option>Relevance</option>
+          <option>Title A–Z</option>
+          <option>Newest</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="book-grid">
+      <div class="book-card">
+        <div class="book-cover">
+          <span class="cover-tag">Science</span>
+          <button class="bookmark-btn">🔖</button>
+          The Elegant Universe
+        </div>
+        <div class="book-info">
+          <div class="book-title">The Elegant Universe: Superstrings, Hidden…</div>
+          <div class="book-author">Brian Greene</div>
+          <div class="book-status"><span class="dot available"></span> Available</div>
+          <button class="btn-view">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-cover" style="background:linear-gradient(135deg,#8a5a2b,#c98f4e);">
+          <span class="cover-tag">History</span>
+          <button class="bookmark-btn">🔖</button>
+          Guns, Germs, and Steel
+        </div>
+        <div class="book-info">
+          <div class="book-title">Guns, Germs, and Steel: The Fates of Human Societies</div>
+          <div class="book-author">Jared Diamond</div>
+          <div class="book-status"><span class="dot borrowed"></span> Borrowed - Due Oct 12</div>
+          <button class="btn-view">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-cover" style="background:linear-gradient(135deg,#0b0f14,#2d3748);">
+          <span class="cover-tag">Science</span>
+          <button class="bookmark-btn">🔖</button>
+          A Brief History of Time
+        </div>
+        <div class="book-info">
+          <div class="book-title">A Brief History of Time</div>
+          <div class="book-author">Stephen Hawking</div>
+          <div class="book-status"><span class="dot available"></span> Available</div>
+          <button class="btn-view">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-cover" style="background:linear-gradient(135deg,#374151,#6b7280);">
+          <span class="cover-tag">History</span>
+          <button class="bookmark-btn">🔖</button>
+          Sapiens
+        </div>
+        <div class="book-info">
+          <div class="book-title">Sapiens: A Brief History of Humankind</div>
+          <div class="book-author">Yuval Noah Harari</div>
+          <div class="book-status"><span class="dot available"></span> Available (2 copies)</div>
+          <button class="btn-view">View Details</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination-row">
+      <span>Showing 1 to 12 of 339 entries</span>
+      <div class="pages">
+        <div class="page-btn">‹</div>
+        <div class="page-btn active">1</div>
+        <div class="page-btn">2</div>
+        <div class="page-btn">3</div>
+        <div class="page-btn dots">…</div>
+        <div class="page-btn">29</div>
+        <div class="page-btn">›</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <div>
+    <div class="f-brand">Scholaris Library</div>
+    <div class="f-copy">© 2024 Scholaris Library. All rights reserved.</div>
+  </div>
+  <div class="f-links">
+    <a href="#">Institutional Privacy</a>
+    <a href="#">Access Policy</a>
+    <a href="#">Staff Directory</a>
+    <a href="#">Research Guides</a>
+    <a href="#">Technical Support</a>
+  </div>
+</footer>
+
+<script>
+  // Kiểm tra phiên đăng nhập; chưa đăng nhập thì quay lại login.html
+  const raw = sessionStorage.getItem('scholaris_user');
+  if (!raw) {
+    window.location.href = 'login.html';
+  } else {
+    const user = JSON.parse(raw);
+    document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+
+    const toast = document.getElementById('toast');
+    toast.textContent = 'Login Successful';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  document.getElementById('userAvatar').addEventListener('click', () => {
+    if (confirm('Đăng xuất khỏi Scholaris Library?')) {
+      sessionStorage.removeItem('scholaris_user');
+      window.location.href = 'login.html';
+    }
+  });
+
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    document.querySelectorAll('.filters .checkbox').forEach(cb => cb.checked = false);
+  });
+
+  document.querySelectorAll('.bookmark-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.classList.toggle('active');
+    });
+  });
+</script>
+</body>
+</html>
