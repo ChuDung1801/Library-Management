@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;
+    --surface-container-lowest:#ffffff;
+    --surface-container-low:#f2f4f6;
+    --surface-container-high:#e6e8ea;
+    --on-surface:#191c1e;
+    --on-surface-variant:#43474e;
+    --outline:#74777f;
+    --outline-variant:#c4c6cf;
+    --primary-deep:#002045;
+    --primary:#1a365d;
+    --on-primary:#ffffff;
+    --secondary:#2b6cb0;
+    --tertiary-border:#e2e8f0;
+    --error-container:#ffdad6;
+    --on-error-container:#93000a;
+    --success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Manrope', sans-serif;
+    background:var(--surface);
+    color:var(--on-surface);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .login-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:24px 48px;
+  }
+  .login-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:28px;
+    font-weight:700;
+    color:var(--primary-deep);
+  }
+  .login-header-icons{display:flex;gap:16px;}
+  .icon-btn{
+    width:40px;height:40px;border-radius:9999px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--outline-variant);
+    color:var(--primary-deep);
+    background:var(--surface-container-lowest);
+    cursor:pointer;
+  }
+  .login-body{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    width:100%;
+    max-width:448px;
+    background:var(--surface-container-lowest);
+    border-radius:1.5rem;
+    border-top:4px solid var(--primary-deep);
+    box-shadow:0 20px 40px -12px rgba(26,54,93,0.15);
+    padding:40px;
+  }
+  .login-card h1{
+    font-size:24px;
+    font-weight:700;
+    text-align:center;
+    margin:0 0 6px;
+    color:var(--primary-deep);
+  }
+  .login-card p.subtitle{
+    text-align:center;
+    color:var(--on-surface-variant);
+    margin:0 0 28px;
+    font-size:15px;
+  }
+  .field{margin-bottom:20px;}
+  .field-label-row{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
+  }
+  label{
+    font-size:14px;font-weight:600;color:rgba(26,54,93,0.6);
+  }
+  .forgot-link{font-size:14px;color:var(--secondary);text-decoration:none;font-weight:600;}
+  .forgot-link:hover{text-decoration:underline;}
+  .input-wrap{position:relative;}
+  input[type=text], input[type=password]{
+    width:100%;
+    padding:12px 14px;
+    border-radius:1rem;
+    border:1px solid var(--tertiary-border);
+    background:var(--surface-container-low);
+    font-size:15px;
+    font-family:inherit;
+    color:var(--on-surface);
+    outline:none;
+  }
+  input:focus{
+    border:2px solid var(--secondary);
+    box-shadow:0 0 0 4px rgba(43,108,176,0.12);
+    padding:11px 13px;
+  }
+  .toggle-pw{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    cursor:pointer;color:var(--outline);background:none;border:none;padding:4px;display:flex;
+  }
+  .remember-row{
+    display:flex;align-items:center;gap:10px;margin-bottom:24px;
+  }
+  .checkbox{
+    width:18px;height:18px;border-radius:0.25rem;border:1.5px solid var(--outline-variant);
+    cursor:pointer;appearance:none;-webkit-appearance:none;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--surface-container-lowest);
+  }
+  .checkbox:checked{background:var(--secondary);border-color:var(--secondary);}
+  .checkbox:checked::after{content:"✓";color:white;font-size:13px;font-weight:700;}
+  .remember-row label{font-weight:500;color:var(--on-surface-variant);cursor:pointer;}
+  .btn-primary{
+    width:100%;
+    padding:14px;
+    border-radius:1rem;
+    background:var(--primary-deep);
+    color:var(--on-primary);
+    border:none;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:box-shadow .15s, transform .15s;
+  }
+  .btn-primary:hover{box-shadow:0 8px 20px -6px rgba(0,32,69,0.5); transform:translateY(-1px);}
+  .divider{
+    display:flex;align-items:center;gap:12px;margin:24px 0;
+    color:var(--outline);font-size:12px;font-weight:600;letter-spacing:.05em;
+  }
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--outline-variant);}
+  .btn-secondary{
+    width:100%;
+    padding:14px;
+    border-radius:1rem;
+    background:transparent;
+    color:var(--primary-deep);
+    border:1.5px solid var(--primary-deep);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-secondary:hover{background:var(--surface-container-low);}
+  .demo-hint{
+    margin-top:20px;padding:12px 14px;border-radius:0.75rem;
+    background:var(--surface-container-low);
+    font-size:13px;color:var(--on-surface-variant);
+    border:1px dashed var(--outline-variant);
+    text-align:center;
+  }
+  .demo-hint b{color:var(--primary-deep);}
+  .error-banner{
+    display:none;
+    background:var(--error-container);
+    color:var(--on-error-container);
+    padding:10px 14px;border-radius:0.75rem;
+    font-size:14px;font-weight:600;
+    margin-bottom:18px;
+  }
+  .error-banner.show{display:block;}
+  .login-footer{
+    text-align:center;padding:20px;
+    color:var(--outline);font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="login-header">
+    <div class="login-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Scholaris Library
+    </div>
+    <div class="login-header-icons">
+      <div class="icon-btn">?</div>
+      <div class="icon-btn">i</div>
+    </div>
+  </div>
+
+  <div class="login-body">
+    <div class="login-card">
+      <h1>Sign In</h1>
+      <p class="subtitle">Access your institutional account</p>
+
+      <div class="error-banner" id="loginError">Sai email/Library ID hoặc mật khẩu.</div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginId">Email or Library ID</label>
+          <input type="text" id="loginId" placeholder="e.g. jdoe@institution.edu" autocomplete="username">
+        </div>
+        <div class="field">
+          <div class="field-label-row">
+            <label for="loginPw">Password</label>
+            <a href="#" class="forgot-link">Forgot Password?</a>
+          </div>
+          <div class="input-wrap">
+            <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pw" id="togglePw">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="remember-row">
+          <input type="checkbox" class="checkbox" id="rememberMe">
+          <label for="rememberMe">Remember this device</label>
+        </div>
+        <button type="submit" class="btn-primary">Secure Login</button>
+      </form>
+
+      <div class="divider">OR</div>
+      <a class="btn-secondary" href="register.html" style="display:block;text-align:center;text-decoration:none;">Create Member Account</a>
+
+      <div class="demo-hint">
+        Tài khoản Admin: <b>admin</b> / <b>admin123</b><br>
+        Tài khoản Người dùng: <b>user</b> / <b>user123</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-footer">© 2024 Scholaris Library Systems. All rights reserved.</div>
+
+<script src="../js/app.js"></script>
+<script>
+  // Danh sách tài khoản demo
+  const ACCOUNTS = getUsers().map(user => ({
+    id: user.username,
+    pw: user.password,
+    name: user.name,
+    role: user.role,
+    redirect: user.role === 'ADMIN' ? '../index.html' : 'books.html',
+    userId: user.id
+  }));
+
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+  const togglePw = document.getElementById('togglePw');
+  const pwInput = document.getElementById('loginPw');
+
+  togglePw.addEventListener('click', () => {
+    pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+  });
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const idVal = document.getElementById('loginId').value.trim();
+    const pwVal = pwInput.value;
+    const account = ACCOUNTS.find(a => a.id === idVal && a.pw === pwVal);
+
+    if (account) {
+      loginError.classList.remove('show');
+      // Lưu phiên đăng nhập tạm để home.html/catalog.html hiển thị tên + chặn truy cập trực tiếp
+      sessionStorage.setItem('scholaris_user', JSON.stringify({ id: account.userId, name: account.name, role: account.role }));
+      window.location.href = account.redirect;
+    } else {
+      loginError.classList.add('show');
+    }
+  });
+</script>
+</body>
+</html>

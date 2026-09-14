@@ -1,0 +1,1 @@
+function getSessionUser(){const raw=sessionStorage.getItem('scholaris_user');return raw?JSON.parse(raw):null}function logout(){sessionStorage.removeItem('scholaris_user');location.href='login.html'}

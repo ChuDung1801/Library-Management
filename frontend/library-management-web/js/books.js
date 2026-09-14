@@ -1,0 +1,1 @@
+async function searchBooks(keyword){return apiRequest(`/books?search=${encodeURIComponent(keyword||'')}`)}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Book Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;
+    --surface-container-lowest:#ffffff;
+    --surface-container-low:#f2f4f6;
+    --surface-container:#eceef0;
+    --surface-container-high:#e6e8ea;
+    --on-surface:#191c1e;
+    --on-surface-variant:#43474e;
+    --outline:#74777f;
+    --outline-variant:#c4c6cf;
+    --primary-deep:#002045;
+    --primary:#1a365d;
+    --secondary:#2b6cb0;
+    --secondary-container:#7db6ff;
+    --error:#ba1a1a;
+    --success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Manrope', sans-serif;
+    background:var(--surface);
+    color:var(--on-surface);
+  }
+  #toast{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);
+    background:var(--success-container);color:#14532d;
+    padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;
+    box-shadow:0 10px 25px -8px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:all .25s;
+    z-index:999;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Header (đồng bộ với catalog.html) */
+  header{
+    background:var(--surface-container-lowest);
+    border-bottom:1px solid var(--outline-variant);
+    padding:16px 48px;
+    display:flex;align-items:center;gap:32px;
+  }
+  .brand{font-size:22px;font-weight:700;color:var(--primary-deep);display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  nav{display:flex;gap:28px;flex:1;}
+  nav a{
+    text-decoration:none;color:var(--on-surface-variant);font-weight:600;font-size:15px;
+    padding-bottom:4px;border-bottom:2px solid transparent;
+  }
+  nav a.active{color:var(--primary-deep);border-color:var(--primary-deep);}
+  .header-right{display:flex;align-items:center;gap:18px;}
+  .search-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-container-low);
+    border:1px solid var(--outline-variant);
+    border-radius:9999px;padding:9px 16px;
+    width:260px;color:var(--outline);
+  }
+  .search-box input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;flex:1;color:var(--on-surface);}
+  .icon-btn{
+    width:38px;height:38px;border-radius:9999px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--primary-deep);cursor:pointer;background:none;border:none;font-size:17px;
+  }
+  .avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--secondary);color:#fff;font-weight:700;
+    display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb{
+    max-width:1400px;margin:0 auto;padding:28px 48px 0;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    font-size:15px;color:var(--on-surface-variant);
+  }
+  .breadcrumb a{color:var(--on-surface-variant);text-decoration:none;font-weight:600;}
+  .breadcrumb a:hover{color:var(--secondary);}
+  .breadcrumb .sep{color:var(--outline);}
+  .breadcrumb .current{color:var(--on-surface);font-weight:700;}
+
+  /* Layout */
+  .detail-layout{
+    max-width:1400px;margin:0 auto;padding:24px 48px 40px;
+    display:flex;gap:48px;align-items:flex-start;
+  }
+  .detail-left{width:360px;flex-shrink:0;}
+  .cover-frame{
+    background:var(--surface-container-lowest);
+    border:1px solid var(--outline-variant);
+    border-radius:1.5rem;padding:16px;margin-bottom:20px;
+  }
+  .cover-frame .cover{
+    aspect-ratio:4/5;border-radius:1rem;
+    background:linear-gradient(135deg,var(--primary-deep),var(--secondary));
+    display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,0.92);font-weight:700;font-size:20px;text-align:center;padding:24px;
+  }
+  .btn-reserve{
+    width:100%;padding:14px;border-radius:1rem;
+    background:var(--primary-deep);color:#fff;border:none;
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;
+  }
+  .btn-reserve:hover{box-shadow:0 8px 20px -6px rgba(0,32,69,0.5);}
+  .btn-favorite{
+    width:100%;padding:14px;border-radius:1rem;
+    background:transparent;color:var(--primary-deep);border:1.5px solid var(--primary-deep);
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;
+  }
+  .btn-favorite:hover{background:var(--surface-container-low);}
+  .btn-favorite.active{background:var(--secondary-container);border-color:var(--secondary);color:var(--primary-deep);}
+  .avail-box{
+    background:var(--surface-container-low);
+    border-radius:1rem;padding:18px 20px;
+  }
+  .avail-label{font-size:12px;font-weight:700;color:var(--outline);letter-spacing:.05em;margin-bottom:10px;}
+  .avail-copies{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--on-surface);margin-bottom:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--secondary);flex-shrink:0;}
+  .avail-location{font-size:14px;color:var(--on-surface-variant);}
+
+  .detail-right{flex:1;min-width:0;}
+  h1.book-title-lg{font-size:42px;font-weight:700;line-height:1.15;margin:0 0 12px;color:var(--on-surface);}
+  .book-author-lg{font-size:22px;font-weight:600;color:var(--secondary);margin:0 0 16px;}
+  .meta-row{
+    display:flex;flex-wrap:wrap;align-items:center;gap:24px;
+    font-size:15px;color:var(--on-surface-variant);margin-bottom:20px;
+  }
+  .meta-row span{display:flex;align-items:center;gap:8px;}
+  .stars{color:var(--secondary);letter-spacing:2px;}
+  hr.divider{border:none;border-top:1px solid var(--outline-variant);margin:0 0 28px;}
+
+  h2.section-title{font-size:26px;font-weight:700;color:var(--on-surface);margin:0 0 16px;}
+  .synopsis p{font-size:16px;line-height:1.7;color:var(--on-surface-variant);margin:0 0 16px;}
+
+  .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:32px 0;}
+  .info-card{
+    background:var(--surface-container-lowest);
+    border:1px solid var(--outline-variant);
+    border-radius:1rem;padding:16px;
+  }
+  .info-label{font-size:11px;font-weight:700;color:var(--outline);letter-spacing:.05em;margin-bottom:6px;}
+  .info-value{font-size:16px;font-weight:700;color:var(--on-surface);}
+
+  .subjects-label{font-size:12px;font-weight:700;color:var(--outline);letter-spacing:.05em;margin-bottom:12px;}
+  .subject-tags{display:flex;flex-wrap:wrap;gap:10px;}
+  .subject-tag{
+    background:var(--surface-container-high);color:var(--on-surface-variant);
+    padding:8px 16px;border-radius:9999px;font-size:14px;font-weight:600;
+  }
+
+  footer{
+    background:var(--surface-container-high);
+    padding:32px 48px;margin-top:20px;
+    display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;
+  }
+  footer .f-brand{font-size:20px;font-weight:700;color:var(--on-surface);margin-bottom:6px;}
+  footer .f-copy{font-size:13px;color:var(--outline);}
+  footer .f-links{display:flex;gap:24px;flex-wrap:wrap;}
+  footer .f-links a{color:var(--on-surface-variant);text-decoration:none;font-size:14px;font-weight:600;}
+
+  @media (max-width: 900px){
+    header{flex-wrap:wrap;padding:16px 20px;}
+    nav{order:3;width:100%;overflow-x:auto;}
+    .search-box{width:180px;}
+    .breadcrumb{padding:20px 20px 0;}
+    .detail-layout{flex-direction:column;padding:20px;}
+    .detail-left{width:100%;}
+    h1.book-title-lg{font-size:32px;}
+    .info-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    Scholaris Library
+  </div>
+  <nav>
+    <a href="catalog.html" class="active">Catalog</a>
+    <a href="#">Reserves</a>
+    <a href="#">Journals</a>
+    <a href="#">Digital Collection</a>
+  </nav>
+  <div class="header-right">
+    <div class="search-box">🔍<input type="text" placeholder="Search catalog..."></div>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🔖</button>
+    <div class="avatar" id="userAvatar" title="Đăng xuất">U</div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="catalog.html">Catalog</a>
+  <span class="sep">›</span>
+  <span id="crumbCategory">Computer Science</span>
+  <span class="sep">›</span>
+  <span class="current" id="crumbTitle">Data Structures & Algorithms</span>
+</div>
+
+<div class="detail-layout">
+  <div class="detail-left">
+    <div class="cover-frame">
+      <div class="cover" id="bookCover">Data Structures and Algorithms</div>
+    </div>
+    <button class="btn-reserve" id="reserveBtn">📖 Reserve Copy</button>
+    <button class="btn-favorite" id="favoriteBtn">♡ Add to Favorites</button>
+
+    <div class="avail-box">
+      <div class="avail-label">AVAILABILITY</div>
+      <div class="avail-copies"><span class="dot"></span><span id="copiesText">3 Copies Available</span></div>
+      <div class="avail-location" id="locationText">Location: Floor 2, Section CS-A, Shelf 14</div>
+    </div>
+  </div>
+
+  <div class="detail-right">
+    <h1 class="book-title-lg" id="bookTitle">Data Structures & Algorithm Analysis</h1>
+    <p class="book-author-lg" id="bookAuthor">Dr. Alan Turing</p>
+
+    <div class="meta-row">
+      <span>📅 Published: <b id="metaPublished">2023 (4th Edition)</b></span>
+      <span>🔠 ISBN: <span id="metaIsbn">978-0-13-468599-1</span></span>
+      <span class="stars" id="metaStars">★★★★★</span>
+      <span id="metaReviews">4.8 (124 reviews)</span>
+    </div>
+
+    <hr class="divider">
+
+    <h2 class="section-title">Synopsis</h2>
+    <div class="synopsis" id="synopsisText">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+      <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Praesent elementum facilisis leo vel fringilla est ullamcorper eget nulla. Neque aliquam vestibulum morbi blandit cursus risus at. In mollis nunc sed id semper risus in hendrerit gravida.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card"><div class="info-label">PUBLISHER</div><div class="info-value" id="infoPublisher">Academic Press</div></div>
+      <div class="info-card"><div class="info-label">PAGES</div><div class="info-value" id="infoPages">842</div></div>
+      <div class="info-card"><div class="info-label">LANGUAGE</div><div class="info-value" id="infoLanguage">English</div></div>
+      <div class="info-card"><div class="info-label">FORMAT</div><div class="info-value" id="infoFormat">Hardcover</div></div>
+    </div>
+
+    <div class="subjects-label">SUBJECTS</div>
+    <div class="subject-tags" id="subjectTags">
+      <span class="subject-tag">Computer Science</span>
+      <span class="subject-tag">Algorithms</span>
+      <span class="subject-tag">Programming</span>
+      <span class="subject-tag">Mathematics</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div class="f-brand">Scholaris Library</div>
+    <div class="f-copy">© 2024 Scholaris Library. All rights reserved.</div>
+  </div>
+  <div class="f-links">
+    <a href="#">Institutional Privacy</a>
+    <a href="#">Access Policy</a>
+    <a href="#">Staff Directory</a>
+    <a href="#">Research Guides</a>
+    <a href="#">Technical Support</a>
+  </div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+  // Kiểm tra phiên đăng nhập; chưa đăng nhập thì quay lại login.html
+  const raw = sessionStorage.getItem('scholaris_user');
+  if (!raw) {
+    window.location.href = 'login.html';
+  } else {
+    const user = JSON.parse(raw);
+    document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+  }
+
+  document.getElementById('userAvatar').addEventListener('click', () => {
+    if (confirm('Đăng xuất khỏi Scholaris Library?')) {
+      sessionStorage.removeItem('scholaris_user');
+      window.location.href = 'login.html';
+    }
+  });
+
+  // Dữ liệu chi tiết sách, khớp với id gắn ở nút "View Details" trong catalog.html
+  const BOOKS = {
+    "elegant-universe": {
+      category: "Science", title: "The Elegant Universe: Superstrings, Hidden Dimensions",
+      author: "Brian Greene", published: "2003 (1st Edition)", isbn: "978-0-393-33810-2",
+      rating: "★★★★★", reviews: "4.6 (98 reviews)",
+      copies: "Available", location: "Location: Floor 1, Section SCI-B, Shelf 07",
+      publisher: "W. W. Norton", pages: "448", language: "English", format: "Paperback",
+      subjects: ["Science", "Physics", "String Theory", "Cosmology"],
+      cover: "The Elegant Universe", gradient: "linear-gradient(135deg,#002045,#2b6cb0)"
+    },
+    "guns-germs-steel": {
+      category: "History", title: "Guns, Germs, and Steel: The Fates of Human Societies",
+      author: "Jared Diamond", published: "1997 (1st Edition)", isbn: "978-0-393-31755-8",
+      rating: "★★★★★", reviews: "4.5 (210 reviews)",
+      copies: "Borrowed - Due Oct 12", location: "Location: Floor 2, Section HIS-C, Shelf 22",
+      publisher: "W. W. Norton", pages: "480", language: "English", format: "Paperback",
+      subjects: ["History", "Anthropology", "Sociology"],
+      cover: "Guns, Germs, and Steel", gradient: "linear-gradient(135deg,#8a5a2b,#c98f4e)"
+    },
+    "brief-history-time": {
+      category: "Science", title: "A Brief History of Time",
+      author: "Stephen Hawking", published: "1988 (1st Edition)", isbn: "978-0-553-38016-3",
+      rating: "★★★★★", reviews: "4.7 (312 reviews)",
+      copies: "3 Copies Available", location: "Location: Floor 1, Section SCI-A, Shelf 03",
+      publisher: "Bantam Books", pages: "256", language: "English", format: "Hardcover",
+      subjects: ["Science", "Astrophysics", "Cosmology"],
+      cover: "A Brief History of Time", gradient: "linear-gradient(135deg,#0b0f14,#2d3748)"
+    },
+    "sapiens": {
+      category: "History", title: "Sapiens: A Brief History of Humankind",
+      author: "Yuval Noah Harari", published: "2011 (1st Edition)", isbn: "978-0-06-231609-7",
+      rating: "★★★★★", reviews: "4.8 (524 reviews)",
+      copies: "Available (2 copies)", location: "Location: Floor 2, Section HIS-A, Shelf 11",
+      publisher: "Harper", pages: "443", language: "English", format: "Paperback",
+      subjects: ["History", "Anthropology", "Philosophy"],
+      cover: "Sapiens", gradient: "linear-gradient(135deg,#374151,#6b7280)"
+    }
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const bookId = params.get('id');
+  const book = BOOKS[bookId] || BOOKS["elegant-universe"];
+
+  document.getElementById('crumbCategory').textContent = book.category;
+  document.getElementById('crumbTitle').textContent = book.title;
+  document.getElementById('bookTitle').textContent = book.title;
+  document.getElementById('bookAuthor').textContent = book.author;
+  document.getElementById('metaPublished').textContent = book.published;
+  document.getElementById('metaIsbn').textContent = book.isbn;
+  document.getElementById('metaStars').textContent = book.rating;
+  document.getElementById('metaReviews').textContent = book.reviews;
+  document.getElementById('copiesText').textContent = book.copies;
+  document.getElementById('locationText').textContent = book.location;
+  document.getElementById('infoPublisher').textContent = book.publisher;
+  document.getElementById('infoPages').textContent = book.pages;
+  document.getElementById('infoLanguage').textContent = book.language;
+  document.getElementById('infoFormat').textContent = book.format;
+
+  const cover = document.getElementById('bookCover');
+  cover.textContent = book.cover;
+  cover.style.background = book.gradient;
+
+  const tagsWrap = document.getElementById('subjectTags');
+  tagsWrap.innerHTML = book.subjects.map(s => `<span class="subject-tag">${s}</span>`).join('');
+
+  document.getElementById('favoriteBtn').addEventListener('click', function () {
+    this.classList.toggle('active');
+    this.innerHTML = this.classList.contains('active') ? '❤ Added to Favorites' : '♡ Add to Favorites';
+  });
+
+  document.getElementById('reserveBtn').addEventListener('click', () => {
+    const currentUser = getCurrentUser();
+    if (currentUser.role !== 'MEMBER') { showToast('Chi thanh vien moi co the muon sach.', 'error'); return; }
+    const result = borrowBook(bookId ? `b-${bookId}` : 'b-elegant-universe', currentUser.id);
+    if (result.error) { showToast(result.error, 'error'); return; }
+    showToast('Da tao phieu muon. Han tra sau 14 ngay.');
+  });
+</script>
+</body>
+</html>

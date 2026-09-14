@@ -1,0 +1,1 @@
+async function getCategories(){return apiRequest('/categories')}

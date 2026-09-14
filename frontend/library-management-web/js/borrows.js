@@ -1,0 +1,1 @@
+async function getBorrows(){return apiRequest('/borrows')}
