@@ -1,7 +1,5 @@
 # Library Management System
 
-Cấu trúc dự án được tổ chức theo `FolderContruct.md`.
-
 - Frontend: HTML/CSS/JavaScript cơ bản tại `frontend/library-management-web/`.
 - Backend: ASP.NET Core Web API theo các tầng API, Application, Domain và Infrastructure.
 - Tests: Unit và Integration.
