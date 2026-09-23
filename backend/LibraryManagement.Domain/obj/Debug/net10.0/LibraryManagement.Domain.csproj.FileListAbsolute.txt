@@ -1,0 +1,13 @@
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\bin\Debug\net10.0\LibraryManagement.Domain.deps.json
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\bin\Debug\net10.0\LibraryManagement.Domain.dll
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\bin\Debug\net10.0\LibraryManagement.Domain.pdb
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.csproj.AssemblyReference.cache
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.AssemblyInfoInputs.cache
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.AssemblyInfo.cs
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.sourcelink.json
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.dll
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\refint\LibraryManagement.Domain.dll
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\LibraryManagement.Domain.pdb
+C:\Users\DELL\Documents\GitHub\Library-Sys\LibraryManagement-Sprint1\LibraryManagement\backend\LibraryManagement.Domain\obj\Debug\net10.0\ref\LibraryManagement.Domain.dll

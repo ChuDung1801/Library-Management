@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — My Borrows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --error:#ba1a1a;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+
+  header{background:var(--surface-container-lowest);border-bottom:1px solid var(--outline-variant);padding:16px 48px;display:flex;align-items:center;gap:32px;}
+  .brand{font-size:22px;font-weight:700;color:var(--primary-deep);display:flex;align-items:center;gap:8px;text-decoration:none;}
+  nav{display:flex;gap:28px;flex:1;}
+  nav a{text-decoration:none;color:var(--on-surface-variant);font-weight:600;font-size:15px;}
+  nav a.active{color:var(--primary-deep);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--secondary);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+
+  .main{max-width:1100px;margin:0 auto;padding:32px 24px;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0 0 4px;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:0 0 24px;font-size:14px;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--outline-variant);}
+  .tab{padding:10px 18px;font-weight:700;font-size:14px;color:var(--on-surface-variant);cursor:pointer;border-bottom:2px solid transparent;}
+  .tab.active{color:var(--primary-deep);border-color:var(--primary-deep);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface-container-lowest);border-radius:1.5rem;overflow:hidden;border:1px solid var(--outline-variant);}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:14px 16px;border-bottom:1px solid var(--outline-variant);font-size:13px;background:var(--surface-container-low);}
+  td{padding:12px 16px;border-bottom:1px solid var(--surface-container);}
+  .pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:700;}
+  .pill.borrowed{background:var(--secondary-container);color:var(--primary-deep);}
+  .pill.returned{background:var(--surface-container-low);color:var(--on-surface-variant);}
+  .pill.overdue{background:var(--error-container);color:var(--on-error-container);}
+  .pill.pending{background:#fef3c7;color:#92400e;}
+  .pill.approved{background:var(--success-container);color:#14532d;}
+  .pill.rejected{background:var(--error-container);color:var(--on-error-container);}
+  .empty-state{text-align:center;padding:50px 20px;color:var(--outline);background:var(--surface-container-lowest);border-radius:1.5rem;border:1px dashed var(--outline-variant);}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="catalog.html">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    Scholaris Library
+  </a>
+  <nav>
+    <a href="catalog.html">Catalog</a>
+    <a href="my-borrows.html" class="active">My Borrows</a>
+  </nav>
+  <div class="avatar" id="userAvatar" title="Đăng xuất">U</div>
+</header>
+
+<div class="main">
+  <h1 class="page-title">My Borrows</h1>
+  <p class="page-sub">Sách đang mượn, lịch sử mượn và yêu cầu mượn sách của bạn</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="active">Đang mượn</div>
+    <div class="tab" data-tab="history">Lịch sử mượn (SCRUM-47)</div>
+    <div class="tab" data-tab="requests">Yêu cầu mượn sách</div>
+  </div>
+
+  <div class="panel active" id="panel-active">
+    <table>
+      <thead><tr><th>Sách</th><th>Ngày mượn</th><th>Hạn trả</th><th>Trạng thái</th></tr></thead>
+      <tbody id="activeBody"></tbody>
+    </table>
+    <div class="empty-state" id="activeEmpty" style="display:none;">Bạn không có sách nào đang mượn.</div>
+  </div>
+
+  <div class="panel" id="panel-history">
+    <table>
+      <thead><tr><th>Sách</th><th>Ngày mượn</th><th>Hạn trả</th><th>Ngày trả</th><th>Trạng thái</th></tr></thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+    <div class="empty-state" id="historyEmpty" style="display:none;">Bạn chưa từng mượn sách nào.</div>
+  </div>
+
+  <div class="panel" id="panel-requests">
+    <table>
+      <thead><tr><th>Sách</th><th>Ngày gửi</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+      <tbody id="requestsBody"></tbody>
+    </table>
+    <div class="empty-state" id="requestsEmpty" style="display:none;">Bạn chưa gửi yêu cầu mượn sách nào. Vào Catalog để tìm sách và gửi yêu cầu.</div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/borrows.js"></script>
+<script src="../js/borrow-requests.js"></script>
+<script>
+  const user = requireAuth(['Member']);
+
+  document.getElementById('userAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+  document.getElementById('userAvatar').addEventListener('click', () => {
+    if (confirm('Đăng xuất khỏi Scholaris Library?')) {
+      AuthApi.logout();
+      window.location.href = 'login.html';
+    }
+  });
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+    });
+  });
+
+  function fmtDate(iso) {
+    return iso ? new Date(iso).toLocaleDateString('vi-VN') : '—';
+  }
+  function borrowStatusPill(b) {
+    if (b.status === 'Returned') return '<span class="pill returned">Đã trả</span>';
+    if (b.isOverdue) return '<span class="pill overdue">Quá hạn</span>';
+    return '<span class="pill borrowed">Đang mượn</span>';
+  }
+  function requestStatusPill(status) {
+    const map = { Pending: ['pending', 'Đang chờ duyệt'], Approved: ['approved', 'Đã duyệt'], Rejected: ['rejected', 'Đã từ chối'] };
+    const [cls, label] = map[status] || ['pending', status];
+    return `<span class="pill ${cls}">${label}</span>`;
+  }
+
+  async function loadActive() {
+    try {
+      const items = await BorrowsApi.getMineActive();
+      const body = document.getElementById('activeBody');
+      body.innerHTML = '';
+      document.getElementById('activeEmpty').style.display = items.length ? 'none' : 'block';
+      items.forEach(b => {
+        body.innerHTML += `<tr><td><b>${b.bookTitle}</b></td><td>${fmtDate(b.borrowDate)}</td><td>${fmtDate(b.dueDate)}</td><td>${borrowStatusPill(b)}</td></tr>`;
+      });
+    } catch (err) { console.warn(err.message); }
+  }
+
+  async function loadHistory() {
+    try {
+      const items = await BorrowsApi.getMine();
+      const body = document.getElementById('historyBody');
+      body.innerHTML = '';
+      document.getElementById('historyEmpty').style.display = items.length ? 'none' : 'block';
+      items.forEach(b => {
+        body.innerHTML += `<tr><td><b>${b.bookTitle}</b></td><td>${fmtDate(b.borrowDate)}</td><td>${fmtDate(b.dueDate)}</td><td>${fmtDate(b.returnDate)}</td><td>${borrowStatusPill(b)}</td></tr>`;
+      });
+    } catch (err) { console.warn(err.message); }
+  }
+
+  async function loadRequests() {
+    try {
+      const items = await BorrowRequestsApi.getMine();
+      const body = document.getElementById('requestsBody');
+      body.innerHTML = '';
+      document.getElementById('requestsEmpty').style.display = items.length ? 'none' : 'block';
+      items.forEach(r => {
+        body.innerHTML += `<tr><td><b>${r.bookTitle}</b></td><td>${fmtDate(r.requestedAt)}</td><td>${requestStatusPill(r.status)}</td><td>${r.adminNote || '—'}</td></tr>`;
+      });
+    } catch (err) { console.warn(err.message); }
+  }
+
+  loadActive();
+  loadHistory();
+  loadRequests();
+</script>
+</body>
+</html>

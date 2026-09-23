@@ -1,0 +1,44 @@
+[
+  {
+    "tên": "Nguyễn Văn Admin",
+    "tênĐăngNhập": "admin",
+    "mậtKhẩu": "admin123",
+    "ngàySinh": "1990-05-12",
+    "quyềnHạn": "Admin"
+  },
+  {
+    "tên": "Trần Thị Nhân Viên",
+    "tênĐăngNhập": "employee01",
+    "mậtKhẩu": "employee123",
+    "ngàySinh": "1996-08-23",
+    "quyềnHạn": "Employee"
+  },
+  {
+    "tên": "Lê Văn Nhân Viên",
+    "tênĐăngNhập": "employee02",
+    "mậtKhẩu": "employee123",
+    "ngàySinh": "1994-02-17",
+    "quyềnHạn": "Employee"
+  },
+  {
+    "tên": "Phạm Minh Anh",
+    "tênĐăngNhập": "minhanh.pham",
+    "mậtKhẩu": "user123",
+    "ngàySinh": "2003-11-02",
+    "quyềnHạn": "User"
+  },
+  {
+    "tên": "Hoàng Gia Bảo",
+    "tênĐăngNhập": "baohg",
+    "mậtKhẩu": "user123",
+    "ngàySinh": "2002-07-19",
+    "quyềnHạn": "User"
+  },
+  {
+    "tên": "Đỗ Thu Hà",
+    "tênĐăngNhập": "hadothu",
+    "mậtKhẩu": "user123",
+    "ngàySinh": "2004-01-30",
+    "quyềnHạn": "User"
+  }
+]

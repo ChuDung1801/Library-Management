@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Borrow Requests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --error:#ba1a1a;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--error-container);color:var(--on-error-container);}
+
+  #app{min-height:100vh;display:flex;}
+  .sidebar{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-right:1px solid var(--outline-variant);padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;}
+  .sidebar-brand{padding:8px 12px 20px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;color:var(--on-surface-variant);font-weight:600;font-size:15px;cursor:pointer;margin-bottom:4px;text-decoration:none;}
+  .nav-item:hover{background:var(--surface-container-low);}
+  .nav-item.active{background:var(--secondary-container);color:var(--primary-deep);}
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+
+  .main{flex:1;padding:32px 48px;max-width:1200px;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:4px 0 24px;font-size:14px;}
+
+  .panel{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:8px 24px 24px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:14px 10px;border-bottom:1px solid var(--outline-variant);font-size:13px;}
+  td{padding:12px 10px;border-bottom:1px solid var(--surface-container);color:var(--on-surface);vertical-align:middle;}
+  .actions-cell{display:flex;gap:10px;}
+  .btn-approve{background:#16a34a;color:#fff;border:none;border-radius:0.75rem;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn-reject{background:none;color:var(--error);border:1.5px solid var(--error);border-radius:0.75rem;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--outline);}
+  .empty-state.good{color:#16a34a;font-weight:700;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">📚 Scholaris</div>
+    <a href="home.html" class="nav-item">🏠 Overview</a>
+    <a href="books.html" class="nav-item">📘 Books</a>
+    <a href="categories.html" class="nav-item">🏷️ Categories</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="borrows.html" class="nav-item">🔁 Transactions</a>
+    <a href="borrow-requests.html" class="nav-item active">📩 Requests</a>
+    <a href="borrow-history.html" class="nav-item">🕘 History</a>
+    <a href="overdue-books.html" class="nav-item">⚠️ Overdue</a>
+    <div class="sidebar-bottom">
+      <a href="profile.html" class="nav-item">👤 My Profile</a>
+      <div class="nav-item" id="logoutBtn">↩ Logout</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title">Borrow Requests</h1>
+    <p class="page-sub">Yêu cầu mượn sách đang chờ duyệt từ Thành viên (SCRUM-49)</p>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>Sách</th><th>Thành viên</th><th>SĐT</th><th>Ngày gửi</th><th>Thao tác</th></tr></thead>
+        <tbody id="pendingTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">🎉 Không có yêu cầu nào đang chờ duyệt.</div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/borrow-requests.js"></script>
+<script>
+  requireAuth(['Admin', 'Employee']);
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AuthApi.logout();
+    window.location.href = 'login.html';
+  });
+
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('vi-VN');
+  }
+
+  const tbody = document.getElementById('pendingTableBody');
+  const emptyState = document.getElementById('emptyState');
+
+  async function loadPending() {
+    try {
+      const pending = await BorrowRequestsApi.getPending();
+      tbody.innerHTML = '';
+      if (!pending.length) {
+        emptyState.style.display = 'block';
+        emptyState.classList.add('good');
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      pending.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${r.bookTitle}</b><br><span style="color:var(--outline);font-size:12px;">${r.bookCode}</span></td>
+          <td>${r.memberFullName}</td>
+          <td>${r.memberPhoneNumber}</td>
+          <td>${fmtDate(r.requestedAt)}</td>
+          <td class="actions-cell">
+            <button class="btn-approve" data-approve="${r.id}">Duyệt</button>
+            <button class="btn-reject" data-reject="${r.id}" data-title="${r.bookTitle}">Từ chối</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  tbody.addEventListener('click', async (e) => {
+    const approveId = e.target.getAttribute('data-approve');
+    const rejectId = e.target.getAttribute('data-reject');
+
+    if (approveId) {
+      if (!confirm('Duyệt yêu cầu này? Hệ thống sẽ ghi nhận mượn sách ngay lập tức.')) return;
+      try {
+        await BorrowRequestsApi.approve(approveId);
+        showToast('Đã duyệt yêu cầu mượn sách');
+        await loadPending();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    if (rejectId) {
+      const note = prompt(`Từ chối yêu cầu mượn "${e.target.getAttribute('data-title')}"? Nhập lý do (không bắt buộc):`);
+      if (note === null) return; // bấm Cancel
+      try {
+        await BorrowRequestsApi.reject(rejectId, note);
+        showToast('Đã từ chối yêu cầu');
+        await loadPending();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+  });
+
+  loadPending();
+</script>
+</body>
+</html>

@@ -1,1 +1,234 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Quản lý thành viên</title><link rel="stylesheet" href="../css/admin.css"></head><body><main class="page"><h1>Quản lý thành viên</h1><p>Trang xem và cập nhật thông tin thành viên.</p><a href="../index.html">Về dashboard</a></main></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Members</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --tertiary-border:#e2e8f0;--error:#ba1a1a;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--error-container);color:var(--on-error-container);}
+
+  #app{min-height:100vh;display:flex;}
+  .sidebar{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-right:1px solid var(--outline-variant);padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;}
+  .sidebar-brand{padding:8px 12px 20px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;color:var(--on-surface-variant);font-weight:600;font-size:15px;cursor:pointer;margin-bottom:4px;text-decoration:none;}
+  .nav-item:hover{background:var(--surface-container-low);}
+  .nav-item.active{background:var(--secondary-container);color:var(--primary-deep);}
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+
+  .main{flex:1;padding:32px 48px;max-width:1300px;}
+  .main-header{margin-bottom:24px;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:4px 0 0;font-size:14px;}
+
+  .panel{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:8px 24px 24px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:14px 10px;border-bottom:1px solid var(--outline-variant);font-size:13px;}
+  td{padding:12px 10px;border-bottom:1px solid var(--surface-container);color:var(--on-surface);vertical-align:middle;}
+  .pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:700;}
+  .pill.active{background:var(--success-container);color:#14532d;}
+  .pill.inactive{background:var(--error-container);color:var(--on-error-container);}
+  .btn-outline{background:#fff;color:var(--primary-deep);border:1.5px solid var(--primary-deep);border-radius:1rem;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn-toggle{background:none;border:none;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;}
+  .btn-toggle.deactivate{color:var(--error);}
+  .btn-toggle.activate{color:#16a34a;}
+  .actions-cell{display:flex;gap:14px;align-items:center;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--outline);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:1.5rem;padding:28px;width:100%;max-width:480px;}
+  .modal h2{margin:0 0 18px;color:var(--primary-deep);font-size:20px;}
+  .field{margin-bottom:16px;}
+  label{font-size:13px;font-weight:600;color:rgba(26,54,93,0.6);display:block;margin-bottom:6px;}
+  input[type=text], input[type=email], input[type=tel]{width:100%;padding:10px 12px;border-radius:0.75rem;border:1px solid var(--tertiary-border);background:var(--surface-container-low);font-size:14px;font-family:inherit;color:var(--on-surface);outline:none;}
+  input:focus{border:2px solid var(--secondary);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .btn-plain{background:none;border:none;color:var(--on-surface-variant);font-weight:700;cursor:pointer;padding:10px 16px;font-family:inherit;}
+  .btn-primary{background:var(--primary-deep);color:#fff;border:none;border-radius:1rem;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+  .error-banner{display:none;background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:0.75rem;font-size:13px;font-weight:600;margin-bottom:14px;}
+  .error-banner.show{display:block;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">📚 Scholaris</div>
+    <a href="home.html" class="nav-item">🏠 Overview</a>
+    <a href="books.html" class="nav-item">📘 Books</a>
+    <a href="categories.html" class="nav-item">🏷️ Categories</a>
+    <a href="members.html" class="nav-item active">👥 Members</a>
+    <a href="borrows.html" class="nav-item">🔁 Transactions</a>
+    <a href="borrow-requests.html" class="nav-item">📩 Requests</a>
+    <a href="borrow-history.html" class="nav-item">🕘 History</a>
+    <a href="overdue-books.html" class="nav-item">⚠️ Overdue</a>
+    <div class="sidebar-bottom">
+      <a href="profile.html" class="nav-item">👤 My Profile</a>
+      <div class="nav-item" id="logoutBtn">↩ Logout</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <h1 class="page-title">Members</h1>
+      <p class="page-sub">Quản lý tài khoản thành viên (SCRUM-24, 42)</p>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>Họ tên</th><th>Tên đăng nhập / Email</th><th>SĐT</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody id="membersTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Chưa có thành viên nào.</div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="editModalOverlay">
+  <div class="modal">
+    <h2>Edit Member</h2>
+    <div class="error-banner" id="modalError"></div>
+    <form id="editForm">
+      <div class="field"><label for="fullName">Họ và tên</label><input type="text" id="fullName" maxlength="50" required></div>
+      <div class="field"><label for="email">Email</label><input type="email" id="email" required></div>
+      <div class="field"><label for="phoneNumber">Số điện thoại</label><input type="tel" id="phoneNumber" required></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-plain" id="cancelEditBtn">Hủy</button>
+        <button type="submit" class="btn-primary" id="saveMemberBtn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/members.js"></script>
+<script>
+  requireAuth(['Admin', 'Employee']);
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AuthApi.logout();
+    window.location.href = 'login.html';
+  });
+
+  const tbody = document.getElementById('membersTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const modalOverlay = document.getElementById('editModalOverlay');
+  const modalError = document.getElementById('modalError');
+  const editForm = document.getElementById('editForm');
+  let editingMemberId = null;
+  let membersCache = [];
+
+  async function loadMembers() {
+    try {
+      membersCache = await MembersAdminApi.getAll();
+      tbody.innerHTML = '';
+      emptyState.style.display = membersCache.length ? 'none' : 'block';
+      membersCache.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${m.fullName}</b></td>
+          <td>${m.username || m.email}</td>
+          <td>${m.phoneNumber}</td>
+          <td><span class="pill ${m.isActive ? 'active' : 'inactive'}">${m.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}</span></td>
+          <td class="actions-cell">
+            <button class="btn-outline" data-edit="${m.id}">Edit</button>
+            <button class="btn-toggle ${m.isActive ? 'deactivate' : 'activate'}" data-toggle="${m.id}" data-active="${m.isActive}" data-name="${m.fullName}">
+              ${m.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  tbody.addEventListener('click', async (e) => {
+    const editId = e.target.getAttribute('data-edit');
+    const toggleId = e.target.getAttribute('data-toggle');
+
+    if (editId) {
+      const member = membersCache.find(m => m.id === editId);
+      if (!member) return;
+      editingMemberId = editId;
+      modalError.classList.remove('show');
+      document.getElementById('fullName').value = member.fullName;
+      document.getElementById('phoneNumber').value = member.phoneNumber;
+      document.getElementById('email').value = member.email;
+      modalOverlay.classList.add('show');
+    }
+
+    if (toggleId) {
+      const isActive = e.target.getAttribute('data-active') === 'true';
+      const name = e.target.getAttribute('data-name');
+      const confirmMsg = isActive
+        ? `Vô hiệu hóa tài khoản của "${name}"? Thành viên sẽ không thể đăng nhập.`
+        : `Kích hoạt lại tài khoản của "${name}"?`;
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        await MembersAdminApi.setActive(toggleId, !isActive);
+        showToast(isActive ? 'Đã vô hiệu hóa tài khoản' : 'Đã kích hoạt tài khoản');
+        await loadMembers();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+  });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+  });
+
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    modalError.classList.remove('show');
+    const saveBtn = document.getElementById('saveMemberBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+      await MembersAdminApi.update(editingMemberId, {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim()
+      });
+      modalOverlay.classList.remove('show');
+      showToast('Cập nhật thông tin thành viên thành công');
+      await loadMembers();
+    } catch (err) {
+      modalError.textContent = err.message;
+      modalError.classList.add('show');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  });
+
+  loadMembers();
+</script>
+</body>
+</html>

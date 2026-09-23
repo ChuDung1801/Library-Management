@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — My Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --tertiary-border:#e2e8f0;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--outline-variant);background:var(--surface-container-lowest);}
+  .brand{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .back-link{color:var(--secondary);font-weight:600;text-decoration:none;font-size:14px;}
+  .wrap{max-width:640px;margin:40px auto;padding:0 20px;}
+  .card{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:32px;}
+  .avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
+  .avatar{width:56px;height:56px;border-radius:50%;background:var(--secondary);color:#fff;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center;}
+  .avatar-row h1{margin:0;font-size:22px;color:var(--primary-deep);}
+  .avatar-row .role-pill{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:9999px;background:var(--secondary-container);color:var(--primary-deep);}
+  .field{margin-bottom:18px;}
+  label{font-size:14px;font-weight:600;color:rgba(26,54,93,0.6);display:block;margin-bottom:8px;}
+  input[type=text], input[type=email], input[type=tel]{width:100%;padding:12px 14px;border-radius:1rem;border:1px solid var(--tertiary-border);background:var(--surface-container-low);font-size:15px;font-family:inherit;color:var(--on-surface);outline:none;}
+  input:focus{border:2px solid var(--secondary);box-shadow:0 0 0 4px rgba(43,108,176,0.12);padding:11px 13px;}
+  input:disabled{color:var(--outline);background:var(--surface-container-low);}
+  .btn-primary{padding:12px 22px;border-radius:1rem;background:var(--primary-deep);color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+  .error-banner{display:none;background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:0.75rem;font-size:14px;font-weight:600;margin-bottom:18px;}
+  .error-banner.show{display:block;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="topbar">
+  <div class="brand">📚 Scholaris Library</div>
+  <a href="#" class="back-link" id="backLink">← Back</a>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="avatar-row">
+      <div class="avatar" id="avatarInitial">U</div>
+      <div>
+        <h1 id="headerName">My Profile</h1>
+        <span class="role-pill" id="rolePill">Member</span>
+      </div>
+    </div>
+
+    <div class="error-banner" id="profileError"></div>
+
+    <form id="profileForm">
+      <div class="field">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="username" disabled>
+      </div>
+      <div class="field">
+        <label for="fullName">Họ và tên</label>
+        <input type="text" id="fullName" maxlength="50" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="field">
+        <label for="phoneNumber">Số điện thoại</label>
+        <input type="tel" id="phoneNumber" required>
+      </div>
+      <button type="submit" class="btn-primary" id="saveBtn">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  const user = requireAuth(); // bất kỳ role nào đã đăng nhập đều xem được hồ sơ của chính mình
+  document.getElementById('backLink').href = (user.role === 'Admin' || user.role === 'Employee') ? 'home.html' : 'catalog.html';
+
+  const toast = document.getElementById('toast');
+  const errorBanner = document.getElementById('profileError');
+  const form = document.getElementById('profileForm');
+  const saveBtn = document.getElementById('saveBtn');
+
+  function fillForm(u) {
+    document.getElementById('avatarInitial').textContent = u.fullName.charAt(0).toUpperCase();
+    document.getElementById('headerName').textContent = u.fullName;
+    document.getElementById('rolePill').textContent = u.role;
+    document.getElementById('username').value = u.username || '(chưa đặt - đăng nhập bằng email)';
+    document.getElementById('fullName').value = u.fullName;
+    document.getElementById('email').value = u.email;
+    document.getElementById('phoneNumber').value = u.phoneNumber;
+  }
+
+  fillForm(user);
+
+  // Đồng bộ dữ liệu mới nhất từ server khi mở trang
+  AuthApi.getMe().then(fillForm).catch(() => {});
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBanner.classList.remove('show');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+      const updated = await AuthApi.updateProfile({
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim()
+      });
+      fillForm(updated);
+      toast.textContent = 'Cập nhật thông tin thành công';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    } catch (err) {
+      errorBanner.textContent = err.message || 'Không thể cập nhật thông tin.';
+      errorBanner.classList.add('show');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Changes';
+    }
+  });
+</script>
+</body>
+</html>

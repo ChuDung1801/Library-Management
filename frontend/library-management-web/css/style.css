@@ -1,1 +1,4 @@
-*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#17202b;font:15px Arial,sans-serif}.page{max-width:960px;margin:40px auto;padding:24px;background:#fff;border:1px solid #d8dee7;border-radius:10px}label{display:grid;gap:6px;margin:14px 0;font-weight:700}input{padding:10px;border:1px solid #c8d0da;border-radius:6px}button{padding:10px 16px;background:#082746;color:#fff;border:0;border-radius:6px;cursor:pointer}a{color:#1769aa}
+/* style.css - style dùng chung toàn site.
+   Sprint 1 hiện style được viết inline trong từng trang (login/register/profile/home)
+   để tiện demo nhanh. Từ Sprint 2 trở đi, các style chung (biến màu, layout sidebar,
+   table, badge trạng thái...) sẽ được rút ra file này để tránh lặp code. */

@@ -1,1 +1,154 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Đăng ký thành viên</title><link rel="stylesheet" href="../css/style.css"></head><body><main class="page"><h1>Đăng ký thành viên</h1><form><label>Họ và tên<input required></label><label>Tên đăng nhập<input required></label><label>Mật khẩu<input type="password" required></label><button>Đăng ký</button></form><a href="login.html">Đã có tài khoản? Đăng nhập</a></main></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Create Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;
+    --surface-container-lowest:#ffffff;
+    --surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;
+    --on-surface-variant:#43474e;
+    --outline:#74777f;
+    --outline-variant:#c4c6cf;
+    --primary-deep:#002045;
+    --secondary:#2b6cb0;
+    --tertiary-border:#e2e8f0;
+    --error-container:#ffdad6;
+    --on-error-container:#93000a;
+    --success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);min-height:100vh;display:flex;flex-direction:column;}
+  .login-header{display:flex;align-items:center;justify-content:space-between;padding:24px 48px;}
+  .login-brand{display:flex;align-items:center;gap:10px;font-size:28px;font-weight:700;color:var(--primary-deep);}
+  .login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{width:100%;max-width:480px;background:var(--surface-container-lowest);border-radius:1.5rem;border-top:4px solid var(--primary-deep);box-shadow:0 20px 40px -12px rgba(26,54,93,0.15);padding:40px;}
+  .login-card h1{font-size:24px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--primary-deep);}
+  .login-card p.subtitle{text-align:center;color:var(--on-surface-variant);margin:0 0 28px;font-size:15px;}
+  .field{margin-bottom:18px;}
+  .field-row{display:flex;gap:14px;}
+  .field-row .field{flex:1;}
+  label{font-size:14px;font-weight:600;color:rgba(26,54,93,0.6);display:block;margin-bottom:8px;}
+  input[type=text], input[type=email], input[type=password], input[type=tel]{
+    width:100%;padding:12px 14px;border-radius:1rem;border:1px solid var(--tertiary-border);
+    background:var(--surface-container-low);font-size:15px;font-family:inherit;color:var(--on-surface);outline:none;
+  }
+  input:focus{border:2px solid var(--secondary);box-shadow:0 0 0 4px rgba(43,108,176,0.12);padding:11px 13px;}
+  .hint{font-size:12px;color:var(--outline);margin-top:6px;}
+  .btn-primary{width:100%;padding:14px;border-radius:1rem;background:var(--primary-deep);color:#fff;border:none;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+  .btn-primary:hover:not(:disabled){box-shadow:0 8px 20px -6px rgba(0,32,69,0.5);}
+  .back-link{display:block;text-align:center;margin-top:18px;color:var(--secondary);font-size:14px;font-weight:600;text-decoration:none;}
+  .error-banner{display:none;background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:0.75rem;font-size:14px;font-weight:600;margin-bottom:18px;}
+  .error-banner.show{display:block;}
+  .success-banner{display:none;background:var(--success-container);color:#14532d;padding:10px 14px;border-radius:0.75rem;font-size:14px;font-weight:600;margin-bottom:18px;}
+  .success-banner.show{display:block;}
+  .login-footer{text-align:center;padding:20px;color:var(--outline);font-size:13px;}
+</style>
+</head>
+<body>
+
+  <div class="login-header">
+    <div class="login-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Scholaris Library
+    </div>
+  </div>
+
+  <div class="login-body">
+    <div class="login-card">
+      <h1>Create Account</h1>
+      <p class="subtitle">Đăng ký để trở thành thành viên và bắt đầu mượn sách</p>
+
+      <div class="error-banner" id="registerError"></div>
+      <div class="success-banner" id="registerSuccess">Tạo tài khoản thành công! Đang chuyển đến trang đăng nhập...</div>
+
+      <form id="registerForm">
+        <div class="field">
+          <label for="fullName">Họ và tên</label>
+          <input type="text" id="fullName" maxlength="50" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="jdoe@institution.edu" required>
+          </div>
+          <div class="field">
+            <label for="phoneNumber">Số điện thoại</label>
+            <input type="tel" id="phoneNumber" placeholder="0912345678" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="username">Tên đăng nhập <span style="font-weight:400;color:var(--outline);">(tùy chọn, có thể đăng nhập bằng email)</span></label>
+          <input type="text" id="username" placeholder="vd: minhanh.pham">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="password">Mật khẩu</label>
+            <input type="password" id="password" placeholder="Tối thiểu 6 ký tự" required>
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Xác nhận mật khẩu</label>
+            <input type="password" id="confirmPassword" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" id="registerSubmitBtn">Create Account</button>
+      </form>
+
+      <a href="login.html" class="back-link">← Back to Sign In</a>
+    </div>
+  </div>
+
+  <div class="login-footer">© 2024 Scholaris Library Systems. All rights reserved.</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  const form = document.getElementById('registerForm');
+  const errorBanner = document.getElementById('registerError');
+  const successBanner = document.getElementById('registerSuccess');
+  const submitBtn = document.getElementById('registerSubmitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBanner.classList.remove('show');
+    successBanner.classList.remove('show');
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+      errorBanner.textContent = 'Mật khẩu xác nhận không khớp.';
+      errorBanner.classList.add('show');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang tạo tài khoản...';
+
+    try {
+      // Đăng ký luôn tạo role Member - dùng chung cho luồng "Thành viên tạo tài khoản"
+      // và "Khách tạo tài khoản" (khách đăng ký xong sẽ trở thành thành viên).
+      await AuthApi.register({ fullName, username, email, password, phoneNumber });
+      AuthApi.logout(); // Không tự đăng nhập ngay, để người dùng chủ động đăng nhập lại cho rõ luồng
+      successBanner.classList.add('show');
+      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+    } catch (err) {
+      errorBanner.textContent = err.message || 'Không thể tạo tài khoản. Vui lòng thử lại.';
+      errorBanner.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account';
+    }
+  });
+</script>
+</body>
+</html>

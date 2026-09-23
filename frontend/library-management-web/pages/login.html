@@ -225,55 +225,70 @@
           <input type="checkbox" class="checkbox" id="rememberMe">
           <label for="rememberMe">Remember this device</label>
         </div>
-        <button type="submit" class="btn-primary">Secure Login</button>
+        <button type="submit" class="btn-primary" id="loginSubmitBtn">Secure Login</button>
       </form>
 
       <div class="divider">OR</div>
-      <a class="btn-secondary" href="register.html" style="display:block;text-align:center;text-decoration:none;">Create Member Account</a>
+      <button type="button" class="btn-secondary" id="goRegisterBtn">Create New Account</button>
 
       <div class="demo-hint">
         Tài khoản Admin: <b>admin</b> / <b>admin123</b><br>
-        Tài khoản Người dùng: <b>user</b> / <b>user123</b>
+        Tài khoản Nhân viên: <b>employee01</b> / <b>employee123</b><br>
+        Tài khoản Thành viên: <b>minhanh.pham</b> / <b>user123</b>
       </div>
     </div>
   </div>
 
   <div class="login-footer">© 2024 Scholaris Library Systems. All rights reserved.</div>
 
-<script src="../js/app.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
 <script>
-  // Danh sách tài khoản demo
-  const ACCOUNTS = getUsers().map(user => ({
-    id: user.username,
-    pw: user.password,
-    name: user.name,
-    role: user.role,
-    redirect: user.role === 'ADMIN' ? '../index.html' : 'books.html',
-    userId: user.id
-  }));
-
   const loginForm = document.getElementById('loginForm');
   const loginError = document.getElementById('loginError');
   const togglePw = document.getElementById('togglePw');
   const pwInput = document.getElementById('loginPw');
+  const submitBtn = document.getElementById('loginSubmitBtn');
 
   togglePw.addEventListener('click', () => {
     pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
   });
 
-  loginForm.addEventListener('submit', (e) => {
+  document.getElementById('goRegisterBtn').addEventListener('click', () => {
+    window.location.href = 'register.html';
+  });
+
+  // Nếu đã có phiên hợp lệ, không cần đăng nhập lại
+  if (AuthStorage.getUser()) {
+    const role = AuthStorage.getUser().role;
+    window.location.href = (role === 'Admin' || role === 'Employee') ? 'home.html' : 'catalog.html';
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    loginError.classList.remove('show');
+
     const idVal = document.getElementById('loginId').value.trim();
     const pwVal = pwInput.value;
-    const account = ACCOUNTS.find(a => a.id === idVal && a.pw === pwVal);
 
-    if (account) {
-      loginError.classList.remove('show');
-      // Lưu phiên đăng nhập tạm để home.html/catalog.html hiển thị tên + chặn truy cập trực tiếp
-      sessionStorage.setItem('scholaris_user', JSON.stringify({ id: account.userId, name: account.name, role: account.role }));
-      window.location.href = account.redirect;
-    } else {
+    if (!idVal || !pwVal) {
+      loginError.textContent = 'Vui lòng nhập đầy đủ thông tin đăng nhập.';
       loginError.classList.add('show');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang đăng nhập...';
+
+    try {
+      const data = await AuthApi.login(idVal, pwVal);
+      const role = data.user.role; // "Admin" | "Employee" | "Member"
+      window.location.href = (role === 'Admin' || role === 'Employee') ? 'home.html' : 'catalog.html';
+    } catch (err) {
+      loginError.textContent = err.message || 'Sai email/Library ID hoặc mật khẩu.';
+      loginError.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Secure Login';
     }
   });
 </script>

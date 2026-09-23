@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;
+    --surface-container-lowest:#ffffff;
+    --surface-container-low:#f2f4f6;
+    --surface-container:#eceef0;
+    --surface-container-high:#e6e8ea;
+    --on-surface:#191c1e;
+    --on-surface-variant:#43474e;
+    --outline:#74777f;
+    --outline-variant:#c4c6cf;
+    --primary-deep:#002045;
+    --primary:#1a365d;
+    --secondary:#2b6cb0;
+    --secondary-container:#7db6ff;
+    --error:#ba1a1a;
+    --error-container:#ffdad6;
+    --on-error-container:#93000a;
+    --success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  header{background:var(--surface-container-lowest);border-bottom:1px solid var(--outline-variant);padding:16px 48px;display:flex;align-items:center;gap:32px;}
+  .brand{font-size:22px;font-weight:700;color:var(--primary-deep);display:flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none;}
+  nav{display:flex;gap:28px;flex:1;}
+  nav a{text-decoration:none;color:var(--on-surface-variant);font-weight:600;font-size:15px;padding-bottom:4px;border-bottom:2px solid transparent;}
+  nav a.active{color:var(--primary-deep);border-color:var(--primary-deep);}
+  .header-right{display:flex;align-items:center;gap:14px;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:9999px;padding:9px 16px;width:260px;color:var(--outline);}
+  .search-box input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;flex:1;color:var(--on-surface);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--secondary);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+  .btn-login{padding:9px 18px;border-radius:9999px;background:var(--primary-deep);color:#fff;text-decoration:none;font-weight:700;font-size:14px;}
+
+  .layout{display:flex;gap:24px;padding:32px 48px;max-width:1400px;margin:0 auto;align-items:flex-start;}
+  .filters{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-radius:1.5rem;padding:24px;border:1px solid var(--outline-variant);}
+  .filters-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .filters-head h3{margin:0;font-size:20px;color:var(--on-surface);}
+  .filters-head a{color:var(--secondary);font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;}
+  .filter-label{font-size:12px;font-weight:700;color:var(--outline);letter-spacing:.05em;margin-bottom:10px;}
+  .check-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;color:var(--on-surface);cursor:pointer;}
+  .checkbox{width:18px;height:18px;border-radius:0.25rem;border:1.5px solid var(--outline-variant);cursor:pointer;appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface-container-lowest);}
+  .checkbox:checked{background:var(--secondary);border-color:var(--secondary);}
+  .checkbox:checked::after{content:"✓";color:white;font-size:12px;font-weight:700;}
+
+  .content{flex:1;min-width:0;}
+  .content-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;gap:20px;flex-wrap:wrap;}
+  h1.page-title{font-size:36px;font-weight:700;margin:4px 0 6px;color:var(--primary-deep);}
+  .results-count{color:var(--on-surface-variant);font-size:15px;margin:0 0 24px;}
+  .results-count b{color:var(--on-surface);}
+
+  .book-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .book-card{background:var(--surface-container-lowest);border:1px solid var(--outline-variant);border-radius:1.5rem;overflow:hidden;display:flex;flex-direction:column;}
+  .book-cover{position:relative;aspect-ratio:16/11;background:linear-gradient(135deg,var(--primary-deep),var(--secondary));display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.92);font-weight:700;font-size:15px;text-align:center;padding:16px;}
+  .cover-tag{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.9);color:var(--primary-deep);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:0.5rem;}
+  .book-info{padding:18px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .book-title{font-size:16px;font-weight:700;color:var(--on-surface);line-height:1.3;}
+  .book-author{font-size:14px;color:var(--on-surface-variant);margin-bottom:4px;}
+  .book-status{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--on-surface-variant);margin-bottom:8px;}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot.available{background:#16a34a;}
+  .dot.borrowed{background:var(--secondary);}
+  .dot.unavailable{background:var(--error);}
+  a.btn-view{margin-top:auto;padding:10px;border-radius:1rem;background:transparent;color:var(--primary-deep);border:1.5px solid var(--primary-deep);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;display:block;text-align:center;text-decoration:none;}
+  a.btn-view:hover{background:var(--surface-container-low);}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--outline);background:var(--surface-container-lowest);border-radius:1.5rem;border:1px dashed var(--outline-variant);}
+  .error-banner{background:var(--error-container);color:var(--on-error-container);padding:12px 16px;border-radius:0.75rem;font-size:14px;font-weight:600;margin-bottom:20px;}
+
+  footer{background:var(--surface-container-high);padding:32px 48px;margin-top:40px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+  footer .f-brand{font-size:20px;font-weight:700;color:var(--on-surface);margin-bottom:6px;}
+  footer .f-copy{font-size:13px;color:var(--outline);}
+
+  @media (max-width: 900px){
+    header{flex-wrap:wrap;padding:16px 20px;}
+    nav{order:3;width:100%;overflow-x:auto;}
+    .search-box{width:180px;}
+    .layout{flex-direction:column;padding:20px;}
+    .filters{width:100%;}
+    .book-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <a class="brand" href="catalog.html">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 5.5C2 5.5 5 4 8.5 4C11 4 12 5.5 12 5.5V19.5C12 19.5 11 18 8.5 18C5 18 2 19.5 2 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 5.5C22 5.5 19 4 15.5 4C13 4 12 5.5 12 5.5V19.5C12 19.5 13 18 15.5 18C19 18 22 19.5 22 19.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    Scholaris Library
+  </a>
+  <nav><a href="catalog.html" class="active">Catalog</a></nav>
+  <div class="header-right">
+    <div class="search-box">🔍<input type="text" id="searchInput" placeholder="Tìm sách theo tên, tác giả, mã sách..."></div>
+    <div id="authArea"></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="filters">
+    <div class="filters-head"><h3>Filters</h3><a id="clearFilters">Clear</a></div>
+    <div class="filter-label">THỂ LOẠI</div>
+    <div id="categoryFilters">
+      <label class="check-row"><input type="radio" name="categoryFilter" class="checkbox" value="" checked style="border-radius:50%;"> Tất cả</label>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="content-top">
+      <div>
+        <h1 class="page-title">Catalog</h1>
+        <p class="results-count" id="resultsCount">Đang tải...</p>
+      </div>
+    </div>
+
+    <div id="errorBanner" class="error-banner" style="display:none;"></div>
+    <div class="book-grid" id="bookGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">Không tìm thấy sách phù hợp.</div>
+  </main>
+</div>
+
+<footer>
+  <div>
+    <div class="f-brand">Scholaris Library</div>
+    <div class="f-copy">© 2024 Scholaris Library. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/catalog.js"></script>
+<script>
+  // Catalog KHÔNG bắt buộc đăng nhập (Guest được xem - SCRUM-41).
+  // Nếu đã đăng nhập, hiển thị avatar + logout; nếu chưa, hiển thị nút Login.
+  const user = AuthStorage.getUser();
+  const authArea = document.getElementById('authArea');
+  if (user) {
+    authArea.innerHTML = `<div class="avatar" id="userAvatar" title="Đăng xuất">${user.fullName.charAt(0).toUpperCase()}</div>`;
+    document.getElementById('userAvatar').addEventListener('click', () => {
+      if (confirm('Đăng xuất khỏi Scholaris Library?')) {
+        AuthApi.logout();
+        window.location.reload();
+      }
+    });
+    if (user.role === 'Member') {
+      document.querySelector('nav').innerHTML += `<a href="my-borrows.html">My Borrows</a>`;
+    }
+  } else {
+    authArea.innerHTML = `<a class="btn-login" href="login.html">Đăng nhập</a>`;
+  }
+
+  const bookGrid = document.getElementById('bookGrid');
+  const emptyState = document.getElementById('emptyState');
+  const resultsCount = document.getElementById('resultsCount');
+  const errorBanner = document.getElementById('errorBanner');
+  const searchInput = document.getElementById('searchInput');
+  const categoryFiltersEl = document.getElementById('categoryFilters');
+
+  let selectedCategoryId = '';
+  let searchDebounce = null;
+
+  function statusInfo(status) {
+    if (status === 'Available') return { dot: 'available', label: 'Có sẵn' };
+    if (status === 'Borrowed') return { dot: 'borrowed', label: 'Đang được mượn' };
+    return { dot: 'unavailable', label: 'Không khả dụng' };
+  }
+
+  async function loadCategoryFilters() {
+    try {
+      const categories = await CatalogApi.getCategories();
+      categoryFiltersEl.innerHTML = `
+        <label class="check-row"><input type="radio" name="categoryFilter" class="checkbox" value="" checked style="border-radius:50%;"> Tất cả</label>
+        ${categories.map(c => `<label class="check-row"><input type="radio" name="categoryFilter" class="checkbox" value="${c.id}" style="border-radius:50%;"> ${c.name}</label>`).join('')}
+      `;
+      categoryFiltersEl.querySelectorAll('input[name=categoryFilter]').forEach(input => {
+        input.addEventListener('change', () => {
+          selectedCategoryId = input.value;
+          loadBooks();
+        });
+      });
+    } catch (err) {
+      // Bộ lọc thể loại không tải được không nên chặn xem danh sách sách
+      console.warn('Không tải được danh sách thể loại:', err.message);
+    }
+  }
+
+  async function loadBooks() {
+    errorBanner.style.display = 'none';
+    try {
+      const keyword = searchInput.value.trim();
+      const books = await CatalogApi.getBooks(keyword, selectedCategoryId);
+
+      bookGrid.innerHTML = '';
+      emptyState.style.display = books.length ? 'none' : 'block';
+      resultsCount.innerHTML = keyword
+        ? `Tìm thấy <b>${books.length}</b> kết quả cho "<b>${keyword}</b>"`
+        : `Hiển thị <b>${books.length}</b> đầu sách`;
+
+      books.forEach(b => {
+        const st = statusInfo(b.status);
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+          <div class="book-cover">
+            ${b.categoryName ? `<span class="cover-tag">${b.categoryName}</span>` : ''}
+            ${b.title}
+          </div>
+          <div class="book-info">
+            <div class="book-title">${b.title}</div>
+            <div class="book-author">${b.author}</div>
+            <div class="book-status"><span class="dot ${st.dot}"></span> ${st.label}</div>
+            <a class="btn-view" href="book-detail.html?id=${b.id}">View Details</a>
+          </div>`;
+        bookGrid.appendChild(card);
+      });
+    } catch (err) {
+      errorBanner.textContent = err.message;
+      errorBanner.style.display = 'block';
+      resultsCount.textContent = '';
+    }
+  }
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(loadBooks, 350); // debounce để tránh gọi API liên tục khi gõ
+  });
+
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    searchInput.value = '';
+    selectedCategoryId = '';
+    categoryFiltersEl.querySelector('input[value=""]').checked = true;
+    loadBooks();
+  });
+
+  (async function init() {
+    await loadCategoryFilters();
+    await loadBooks();
+  })();
+</script>
+</body>
+</html>

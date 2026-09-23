@@ -1,1 +1,160 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Lịch sử mượn</title><link rel="stylesheet" href="../css/style.css"></head><body><main class="page"><h1>Lịch sử mượn sách</h1><p>Thành viên xem các phiếu mượn đã tạo và trạng thái trả sách.</p><a href="books.html">Tìm sách</a></main></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Borrow History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --tertiary-border:#e2e8f0;--error:#ba1a1a;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--error-container);color:var(--on-error-container);}
+
+  #app{min-height:100vh;display:flex;}
+  .sidebar{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-right:1px solid var(--outline-variant);padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;}
+  .sidebar-brand{padding:8px 12px 20px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;color:var(--on-surface-variant);font-weight:600;font-size:15px;cursor:pointer;margin-bottom:4px;text-decoration:none;}
+  .nav-item:hover{background:var(--surface-container-low);}
+  .nav-item.active{background:var(--secondary-container);color:var(--primary-deep);}
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+
+  .main{flex:1;padding:32px 48px;max-width:1300px;}
+  .main-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;gap:20px;flex-wrap:wrap;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:4px 0 0;font-size:14px;}
+  select{padding:10px 14px;border-radius:0.75rem;border:1px solid var(--tertiary-border);background:var(--surface-container-lowest);font-size:14px;font-family:inherit;min-width:240px;}
+
+  .panel{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:8px 24px 24px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:14px 10px;border-bottom:1px solid var(--outline-variant);font-size:13px;}
+  td{padding:12px 10px;border-bottom:1px solid var(--surface-container);color:var(--on-surface);}
+  .pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:700;}
+  .pill.borrowed{background:var(--secondary-container);color:var(--primary-deep);}
+  .pill.returned{background:var(--surface-container-low);color:var(--on-surface-variant);}
+  .pill.overdue{background:var(--error-container);color:var(--on-error-container);}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--outline);}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">📚 Scholaris</div>
+    <a href="home.html" class="nav-item">🏠 Overview</a>
+    <a href="books.html" class="nav-item">📘 Books</a>
+    <a href="categories.html" class="nav-item">🏷️ Categories</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="borrows.html" class="nav-item">🔁 Transactions</a>
+    <a href="borrow-requests.html" class="nav-item">📩 Requests</a>
+    <a href="borrow-history.html" class="nav-item active">🕘 History</a>
+    <a href="overdue-books.html" class="nav-item">⚠️ Overdue</a>
+    <div class="sidebar-bottom">
+      <a href="profile.html" class="nav-item">👤 My Profile</a>
+      <div class="nav-item" id="logoutBtn">↩ Logout</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <div>
+        <h1 class="page-title">Borrow History</h1>
+        <p class="page-sub">Toàn bộ lịch sử mượn/trả sách (SCRUM-46)</p>
+      </div>
+      <select id="memberFilter"><option value="">Tất cả thành viên</option></select>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>Sách</th><th>Thành viên</th><th>Ngày mượn</th><th>Hạn trả</th><th>Ngày trả</th><th>Trạng thái</th></tr></thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Chưa có phiếu mượn nào.</div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/borrows.js"></script>
+<script src="../js/members.js"></script>
+<script>
+  requireAuth(['Admin', 'Employee']);
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AuthApi.logout();
+    window.location.href = 'login.html';
+  });
+
+  function fmtDate(iso) {
+    return iso ? new Date(iso).toLocaleDateString('vi-VN') : '—';
+  }
+  function statusPill(b) {
+    if (b.status === 'Returned') return '<span class="pill returned">Đã trả</span>';
+    if (b.isOverdue) return '<span class="pill overdue">Quá hạn</span>';
+    return '<span class="pill borrowed">Đang mượn</span>';
+  }
+
+  const tbody = document.getElementById('historyTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const memberFilter = document.getElementById('memberFilter');
+
+  async function loadMemberOptions() {
+    try {
+      const members = await MembersAdminApi.getAll();
+      memberFilter.innerHTML = '<option value="">Tất cả thành viên</option>' +
+        members.map(m => `<option value="${m.id}">${m.fullName}</option>`).join('');
+    } catch (err) {
+      console.warn('Không tải được danh sách thành viên:', err.message);
+    }
+  }
+
+  async function loadHistory() {
+    try {
+      const memberId = memberFilter.value;
+      const raw = await apiRequest(`/borrows${memberId ? '?memberId=' + memberId : ''}`, { method: 'GET', auth: true });
+      tbody.innerHTML = '';
+      emptyState.style.display = raw.length ? 'none' : 'block';
+      raw.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${b.bookTitle}</b><br><span style="color:var(--outline);font-size:12px;">${b.bookCode}</span></td>
+          <td>${b.memberFullName}</td>
+          <td>${fmtDate(b.borrowDate)}</td>
+          <td>${fmtDate(b.dueDate)}</td>
+          <td>${fmtDate(b.returnDate)}</td>
+          <td>${statusPill(b)}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  memberFilter.addEventListener('change', loadHistory);
+
+  (async function init() {
+    await loadMemberOptions();
+    await loadHistory();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+[
+  {
+    "tênSách": "The Elegant Universe",
+    "nămXuấtBản": 1999,
+    "tácGiả": "Brian Greene",
+    "giớiThiệuSách": "Cuốn sách khoa học phổ thông kinh điển đưa độc giả vào hành trình khám phá lý thuyết dây.",
+    "sơLượcNộiDung": "Tác phẩm giải thích lý thuyết dây và nỗ lực thống nhất vật lý lượng tử với thuyết tương đối tổng quát bằng ngôn ngữ dễ hiểu, phù hợp với độc giả không chuyên vật lý nhưng muốn tìm hiểu sâu về vũ trụ."
+  },
+  {
+    "tênSách": "Guns, Germs, and Steel: The Fates of Human Societies",
+    "nămXuấtBản": 1997,
+    "tácGiả": "Jared Diamond",
+    "giớiThiệuSách": "Tác phẩm đoạt giải Pulitzer lý giải vì sao các nền văn minh phát triển không đồng đều trong lịch sử.",
+    "sơLượcNộiDung": "Sách phân tích ảnh hưởng của địa lý, khí hậu và nguồn tài nguyên sẵn có đến sự phát triển khác biệt giữa các nền văn minh, bác bỏ các quan điểm dựa trên chủng tộc."
+  },
+  {
+    "tênSách": "A Brief History of Time",
+    "nămXuấtBản": 1988,
+    "tácGiả": "Stephen Hawking",
+    "giớiThiệuSách": "Cuốn sách vũ trụ học bán chạy nhất mọi thời đại, giải thích những bí ẩn lớn nhất của vũ trụ.",
+    "sơLượcNộiDung": "Trình bày các khái niệm vũ trụ học hiện đại như Big Bang, hố đen và bản chất của không-thời gian bằng cách tiếp cận gần gũi, không đòi hỏi kiến thức toán học chuyên sâu."
+  },
+  {
+    "tênSách": "Sapiens: A Brief History of Humankind",
+    "nămXuấtBản": 2011,
+    "tácGiả": "Yuval Noah Harari",
+    "giớiThiệuSách": "Hành trình xuyên suốt lịch sử loài người từ thời kỳ đồ đá đến thế giới hiện đại.",
+    "sơLượcNộiDung": "Kể lại quá trình tiến hóa của loài người qua các cuộc cách mạng nhận thức, nông nghiệp và khoa học, đồng thời đặt câu hỏi về tương lai của nhân loại."
+  },
+  {
+    "tênSách": "Clean Code: A Handbook of Agile Software Craftsmanship",
+    "nămXuấtBản": 2008,
+    "tácGiả": "Robert C. Martin",
+    "giớiThiệuSách": "Cẩm nang kinh điển dành cho lập trình viên muốn viết mã nguồn sạch và chuyên nghiệp.",
+    "sơLượcNộiDung": "Hướng dẫn các nguyên tắc, quy ước đặt tên, cách viết hàm và cấu trúc mã nguồn dễ đọc, dễ bảo trì trong phát triển phần mềm hướng đối tượng."
+  },
+  {
+    "tênSách": "Introduction to Algorithms",
+    "nămXuấtBản": 2009,
+    "tácGiả": "Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein",
+    "giớiThiệuSách": "Giáo trình thuật toán được sử dụng rộng rãi nhất trong đào tạo Khoa học Máy tính trên thế giới.",
+    "sơLượcNộiDung": "Bao quát từ cấu trúc dữ liệu cơ bản đến các thuật toán đồ thị, quy hoạch động và thuật toán xấp xỉ nâng cao, kèm chứng minh độ phức tạp chi tiết."
+  },
+  {
+    "tênSách": "The Design of Everyday Things",
+    "nămXuấtBản": 1988,
+    "tácGiả": "Don Norman",
+    "giớiThiệuSách": "Tác phẩm nền tảng của ngành thiết kế trải nghiệm người dùng (UX).",
+    "sơLượcNộiDung": "Trình bày nguyên lý thiết kế lấy con người làm trung tâm, giải thích vì sao một số vật dụng dễ sử dụng còn một số khác lại gây khó chịu cho người dùng."
+  },
+  {
+    "tênSách": "Structure and Interpretation of Computer Programs",
+    "nămXuấtBản": 1985,
+    "tácGiả": "Harold Abelson, Gerald Jay Sussman",
+    "giớiThiệuSách": "Giáo trình lập trình huyền thoại của MIT, còn gọi là 'quyển sách phù thủy'.",
+    "sơLượcNộiDung": "Xây dựng tư duy lập trình thông qua ngôn ngữ Scheme, tập trung vào các khái niệm trừu tượng hóa, đệ quy và mô hình tính toán."
+  },
+  {
+    "tênSách": "The Rise of the Habsburg Empire",
+    "nămXuấtBản": 2015,
+    "tácGiả": "H. Vance",
+    "giớiThiệuSách": "Nghiên cứu lịch sử chi tiết về một trong những đế chế quyền lực nhất châu Âu.",
+    "sơLượcNộiDung": "Khảo sát quá trình hình thành, mở rộng và suy tàn của đế chế Habsburg qua nhiều thế kỷ, cùng ảnh hưởng của nó đến bản đồ chính trị châu Âu."
+  },
+  {
+    "tênSách": "Advanced Calculus",
+    "nămXuấtBản": 2012,
+    "tácGiả": "James Stewart",
+    "giớiThiệuSách": "Giáo trình giải tích nâng cao phổ biến tại các trường đại học kỹ thuật.",
+    "sơLượcNộiDung": "Bao gồm các chủ đề giới hạn, đạo hàm, tích phân, chuỗi vô hạn và ứng dụng thực tế, kèm nhiều bài tập minh họa."
+  },
+  {
+    "tênSách": "Cellular Biology: The Dynamic Cell",
+    "nămXuấtBản": 2018,
+    "tácGiả": "A. Roberts",
+    "giớiThiệuSách": "Tài liệu tham khảo chuyên sâu về sinh học tế bào dành cho sinh viên Y - Sinh.",
+    "sơLượcNộiDung": "Khảo sát cấu trúc, chức năng tế bào ở cấp độ phân tử cùng các cơ chế trao đổi chất, phân chia và tín hiệu tế bào."
+  },
+  {
+    "tênSách": "Architecture of Space: Brutalism, Form and Structure",
+    "nămXuấtBản": 2020,
+    "tácGiả": "Elena Kostas",
+    "giớiThiệuSách": "Tuyển tập hình ảnh và phân tích về phong cách kiến trúc Brutalism trên thế giới.",
+    "sơLượcNộiDung": "Khám phá các công trình kiến trúc Brutalism tiêu biểu, phân tích mối quan hệ giữa hình khối bê tông và trải nghiệm không gian sống."
+  }
+]

@@ -1,7 +1,8 @@
 namespace LibraryManagement.Infrastructure.Data;
 
-public sealed class MongoDbSettings
+/// <summary>Binding cho section "MongoDbSettings" trong appsettings.json.</summary>
+public class MongoDbSettings
 {
     public string ConnectionString { get; set; } = "mongodb://localhost:27017";
-    public string DatabaseName { get; set; } = "LibraryManagement";
+    public string DatabaseName { get; set; } = "LibraryManagementDb";
 }

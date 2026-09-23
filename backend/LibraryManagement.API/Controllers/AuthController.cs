@@ -1,80 +1,59 @@
+using LibraryManagement.API.DTOs.Auth;
+using LibraryManagement.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using LibraryManagement.Infrastructure.Data;
-using MongoDB.Driver;
 
 namespace LibraryManagement.API.Controllers;
-[ApiController, Route("api/auth")]
-public class AuthController(LibraryDbContext context) : ControllerBase
+
+[ApiController]
+[Route("api/auth")]
+public class AuthController : ControllerBase
 {
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
-    {
-        var user = await context.Users.Find(existing => existing.Username == request.Username && existing.IsActive).FirstOrDefaultAsync();
-        if (user is null || !PasswordMatches(request.Password, user.PasswordHash))
-            return Unauthorized(new { message = "Invalid username or password." });
+    private readonly IAuthService _authService;
 
-        return Ok(new { user.Id, user.FullName, user.Username, user.Email, user.Role, user.IsActive });
+    public AuthController(IAuthService authService)
+    {
+        _authService = authService;
     }
 
+    /// <summary>
+    /// Đăng ký tài khoản Member. Dùng chung cho "Thành viên tạo tài khoản" (SCRUM-16)
+    /// và "Khách tạo tài khoản" (SCRUM-31) vì cả hai luồng nghiệp vụ đều tạo ra role Member.
+    /// </summary>
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.PhoneNumber) || string.IsNullOrWhiteSpace(request.Email))
-            return BadRequest("Full name, username, password, phone number and email are required.");
-
-        if (await context.Users.Find(user => user.Username == request.Username || user.Email == request.Email).AnyAsync())
-            return Conflict(new { message = "Username is already registered." });
-
-        var user = new LibraryManagement.Domain.Entities.User
+        var result = await _authService.RegisterAsync(new RegisterModel
         {
-            Id = Guid.NewGuid(),
-            FullName = request.FullName.Trim(),
-            Username = request.Username.Trim(),
-            PasswordHash = HashPassword(request.Password),
-            PhoneNumber = request.PhoneNumber.Trim(),
-            Email = request.Email.Trim(),
-            Role = LibraryManagement.Domain.Enums.Role.Member,
-            IsActive = true
-        };
-        await context.Users.InsertOneAsync(user);
-        var member = new LibraryManagement.Domain.Entities.Member
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            FullName = user.FullName,
-            PhoneNumber = user.PhoneNumber,
-            Email = user.Email,
-            IsActive = true
-        };
-        await context.Members.InsertOneAsync(member);
-        return Created($"/api/members/{member.Id}", new { user.Id, member.Id, user.FullName, user.Username, user.Email, user.Role, user.IsActive });
+            FullName = request.FullName,
+            Username = request.Username,
+            Email = request.Email,
+            Password = request.Password,
+            PhoneNumber = request.PhoneNumber
+        });
+
+        return Ok(MapToResponse(result));
     }
 
-    private static string HashPassword(string password)
+    /// <summary>Đăng nhập bằng username hoặc email (SCRUM-29).</summary>
+    [HttpPost("login")]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
     {
-        var salt = RandomNumberGenerator.GetBytes(16);
-        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100_000, HashAlgorithmName.SHA256, 32);
-        return $"100000.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
+        var result = await _authService.LoginAsync(request.UsernameOrEmail, request.Password);
+        return Ok(MapToResponse(result));
     }
 
-    private static bool PasswordMatches(string password, string storedHash)
+    private static AuthResponse MapToResponse(AuthResult result) => new()
     {
-        var parts = storedHash.Split('.', 3);
-        if (parts.Length != 3 || !int.TryParse(parts[0], out var iterations)) return false;
-        try
+        Token = result.Token,
+        ExpiresAt = result.ExpiresAt,
+        User = new UserResponse
         {
-            var salt = Convert.FromBase64String(parts[1]);
-            var expected = Convert.FromBase64String(parts[2]);
-            var actual = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expected.Length);
-            return CryptographicOperations.FixedTimeEquals(actual, expected);
+            Id = result.User.Id,
+            FullName = result.User.FullName,
+            Username = result.User.Username,
+            Email = result.User.Email,
+            PhoneNumber = result.User.PhoneNumber,
+            Role = result.User.Role.ToString()
         }
-        catch (FormatException)
-        {
-            return false;
-        }
-    }
+    };
 }
-
-public sealed record LoginRequest(string Username, string Password);
-public sealed record RegisterRequest(string FullName, string Username, string Password, string PhoneNumber, string Email);

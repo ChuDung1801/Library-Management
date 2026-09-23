@@ -1,1 +1,178 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Quản lý thể loại</title><link rel="stylesheet" href="../css/admin.css"></head><body><main class="page"><h1>Quản lý thể loại</h1><p>Trang CRUD thể loại sách dành cho quản trị viên.</p><a href="books.html">Quay lại danh sách sách</a></main></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Categories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --tertiary-border:#e2e8f0;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--error-container);color:var(--on-error-container);}
+
+  #app{min-height:100vh;display:flex;}
+  .sidebar{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-right:1px solid var(--outline-variant);padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;}
+  .sidebar-brand{padding:8px 12px 20px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;color:var(--on-surface-variant);font-weight:600;font-size:15px;cursor:pointer;margin-bottom:4px;text-decoration:none;}
+  .nav-item:hover{background:var(--surface-container-low);}
+  .nav-item.active{background:var(--secondary-container);color:var(--primary-deep);}
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+
+  .main{flex:1;padding:32px 48px;max-width:900px;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0 0 4px;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:0 0 24px;font-size:14px;}
+
+  .panel{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:24px;margin-bottom:24px;}
+  .panel h3{margin:0 0 16px;color:var(--primary-deep);font-size:18px;}
+  .field-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+  .field{flex:1;min-width:160px;}
+  label{font-size:13px;font-weight:600;color:rgba(26,54,93,0.6);display:block;margin-bottom:6px;}
+  input[type=text]{width:100%;padding:10px 12px;border-radius:0.75rem;border:1px solid var(--tertiary-border);background:var(--surface-container-low);font-size:14px;font-family:inherit;outline:none;}
+  input:focus{border:2px solid var(--secondary);}
+  .btn-primary{background:var(--primary-deep);color:#fff;border:none;border-radius:0.75rem;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;height:42px;}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+  .error-banner{display:none;background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:0.75rem;font-size:13px;font-weight:600;margin-bottom:14px;}
+  .error-banner.show{display:block;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--outline-variant);font-size:13px;}
+  td{padding:10px 8px;border-bottom:1px solid var(--surface-container);}
+  .prefix-tag{font-family:monospace;font-weight:700;color:var(--secondary);}
+  .empty-state{text-align:center;padding:30px;color:var(--outline);}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">📚 Scholaris</div>
+    <a href="home.html" class="nav-item">🏠 Overview</a>
+    <a href="books.html" class="nav-item">📘 Books</a>
+    <a href="categories.html" class="nav-item active">🏷️ Categories</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="borrows.html" class="nav-item">🔁 Transactions</a>
+    <a href="borrow-requests.html" class="nav-item">📩 Requests</a>
+    <a href="borrow-history.html" class="nav-item">🕘 History</a>
+    <a href="overdue-books.html" class="nav-item">⚠️ Overdue</a>
+    <div class="sidebar-bottom">
+      <a href="profile.html" class="nav-item">👤 My Profile</a>
+      <div class="nav-item" id="logoutBtn">↩ Logout</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title">Categories</h1>
+    <p class="page-sub">Thêm thể loại sách mới để phân loại khi tạo sách (SCRUM-35)</p>
+
+    <div class="panel">
+      <h3>＋ Add New Category</h3>
+      <div class="error-banner" id="formError"></div>
+      <form id="categoryForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Tên thể loại</label>
+            <input type="text" id="name" placeholder="Vũ trụ &amp; Thiên văn" required>
+          </div>
+          <div class="field">
+            <label for="codePrefix">Tiền tố mã sách (tùy chọn)</label>
+            <input type="text" id="codePrefix" placeholder="UNIVER">
+          </div>
+          <button type="submit" class="btn-primary" id="submitBtn">Add</button>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label for="description">Mô tả (tùy chọn)</label>
+          <input type="text" id="description" placeholder="Sách khoa học phổ thông về vũ trụ...">
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h3>Danh sách thể loại</h3>
+      <table>
+        <thead><tr><th>Tên thể loại</th><th>Tiền tố mã</th><th>Mô tả</th></tr></thead>
+        <tbody id="categoryTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Chưa có thể loại nào.</div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/categories.js"></script>
+<script>
+  requireAuth(['Admin', 'Employee']);
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AuthApi.logout();
+    window.location.href = 'login.html';
+  });
+
+  const tbody = document.getElementById('categoryTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const form = document.getElementById('categoryForm');
+  const formError = document.getElementById('formError');
+  const submitBtn = document.getElementById('submitBtn');
+
+  async function loadCategories() {
+    try {
+      const categories = await CategoriesApi.getAll();
+      tbody.innerHTML = '';
+      emptyState.style.display = categories.length ? 'none' : 'block';
+      categories.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><b>${c.name}</b></td><td class="prefix-tag">${c.codePrefix || '—'}</td><td>${c.description || '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError.classList.remove('show');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Adding...';
+
+    try {
+      await CategoriesApi.create({
+        name: document.getElementById('name').value.trim(),
+        codePrefix: document.getElementById('codePrefix').value.trim() || null,
+        description: document.getElementById('description').value.trim() || null
+      });
+      form.reset();
+      showToast('Thêm thể loại thành công');
+      await loadCategories();
+    } catch (err) {
+      formError.textContent = err.message;
+      formError.classList.add('show');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Add';
+    }
+  });
+
+  loadCategories();
+</script>
+</body>
+</html>

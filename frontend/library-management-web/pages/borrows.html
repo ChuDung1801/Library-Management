@@ -1,1 +1,256 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Quản lý mượn trả</title><link rel="stylesheet" href="../css/admin.css"></head><body><main class="page"><h1>Quản lý mượn - trả</h1><p>Trang ghi nhận mượn sách và trả sách.</p><a href="../index.html">Về dashboard</a></main></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholaris Library — Transactions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#f7f9fb;--surface-container-lowest:#ffffff;--surface-container-low:#f2f4f6;
+    --on-surface:#191c1e;--on-surface-variant:#43474e;--outline:#74777f;--outline-variant:#c4c6cf;
+    --primary-deep:#002045;--secondary:#2b6cb0;--secondary-container:#7db6ff;
+    --tertiary-border:#e2e8f0;--error:#ba1a1a;--error-container:#ffdad6;--on-error-container:#93000a;--success-container:#dcfce7;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope', sans-serif;background:var(--surface);color:var(--on-surface);}
+  #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--success-container);color:#14532d;padding:12px 22px;border-radius:0.75rem;font-weight:700;font-size:14px;box-shadow:0 10px 25px -8px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .25s;z-index:999;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--error-container);color:var(--on-error-container);}
+
+  #app{min-height:100vh;display:flex;}
+  .sidebar{width:260px;flex-shrink:0;background:var(--surface-container-lowest);border-right:1px solid var(--outline-variant);padding:24px 16px;display:flex;flex-direction:column;min-height:100vh;}
+  .sidebar-brand{padding:8px 12px 20px;font-size:22px;font-weight:700;color:var(--primary-deep);}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;color:var(--on-surface-variant);font-weight:600;font-size:15px;cursor:pointer;margin-bottom:4px;text-decoration:none;}
+  .nav-item:hover{background:var(--surface-container-low);}
+  .nav-item.active{background:var(--secondary-container);color:var(--primary-deep);}
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+
+  .main{flex:1;padding:32px 48px;max-width:1300px;}
+  .main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:24px;}
+  h1.page-title{font-size:32px;font-weight:700;margin:0;color:var(--primary-deep);}
+  p.page-sub{color:var(--on-surface-variant);margin:4px 0 0;font-size:14px;}
+  .btn-primary{background:var(--primary-deep);color:#fff;border:none;border-radius:1rem;padding:12px 20px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+
+  .panel{background:var(--surface-container-lowest);border-radius:1.5rem;border:1px solid var(--outline-variant);padding:8px 24px 24px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--on-surface-variant);font-weight:600;padding:14px 10px;border-bottom:1px solid var(--outline-variant);font-size:13px;}
+  td{padding:12px 10px;border-bottom:1px solid var(--surface-container);color:var(--on-surface);vertical-align:middle;}
+  .pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:700;}
+  .pill.borrowed{background:var(--secondary-container);color:var(--primary-deep);}
+  .pill.returned{background:var(--surface-container-low);color:var(--on-surface-variant);}
+  .pill.overdue{background:var(--error-container);color:var(--on-error-container);}
+  .btn-outline{background:#fff;color:var(--primary-deep);border:1.5px solid var(--primary-deep);border-radius:1rem;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--outline);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:1.5rem;padding:28px;width:100%;max-width:480px;}
+  .modal h2{margin:0 0 18px;color:var(--primary-deep);font-size:20px;}
+  .field{margin-bottom:16px;}
+  label{font-size:13px;font-weight:600;color:rgba(26,54,93,0.6);display:block;margin-bottom:6px;}
+  select{width:100%;padding:10px 12px;border-radius:0.75rem;border:1px solid var(--tertiary-border);background:var(--surface-container-low);font-size:14px;font-family:inherit;color:var(--on-surface);outline:none;}
+  select:focus{border:2px solid var(--secondary);}
+  .hint{font-size:12px;color:var(--outline);margin-top:6px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .btn-plain{background:none;border:none;color:var(--on-surface-variant);font-weight:700;cursor:pointer;padding:10px 16px;font-family:inherit;}
+  .error-banner{display:none;background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:0.75rem;font-size:13px;font-weight:600;margin-bottom:14px;}
+  .error-banner.show{display:block;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">📚 Scholaris</div>
+    <a href="home.html" class="nav-item">🏠 Overview</a>
+    <a href="books.html" class="nav-item">📘 Books</a>
+    <a href="categories.html" class="nav-item">🏷️ Categories</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="borrows.html" class="nav-item active">🔁 Transactions</a>
+    <a href="borrow-requests.html" class="nav-item">📩 Requests</a>
+    <a href="borrow-history.html" class="nav-item">🕘 History</a>
+    <a href="overdue-books.html" class="nav-item">⚠️ Overdue</a>
+    <div class="sidebar-bottom">
+      <a href="profile.html" class="nav-item">👤 My Profile</a>
+      <div class="nav-item" id="logoutBtn">↩ Logout</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <div>
+        <h1 class="page-title">Transactions</h1>
+        <p class="page-sub">Ghi nhận mượn/trả sách (SCRUM-43, 44)</p>
+      </div>
+      <button class="btn-primary" id="newBorrowBtn">＋ Ghi nhận mượn sách</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>Sách</th><th>Thành viên</th><th>Ngày mượn</th><th>Hạn trả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody id="borrowsTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Chưa có phiếu mượn nào.</div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="borrowModalOverlay">
+  <div class="modal">
+    <h2>Ghi nhận mượn sách</h2>
+    <div class="error-banner" id="modalError"></div>
+    <form id="borrowForm">
+      <div class="field">
+        <label for="bookSelect">Sách</label>
+        <select id="bookSelect" required></select>
+        <div class="hint">Chỉ hiển thị sách còn ít nhất 1 bản khả dụng.</div>
+      </div>
+      <div class="field">
+        <label for="memberSelect">Thành viên</label>
+        <select id="memberSelect" required></select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-plain" id="cancelBorrowBtn">Hủy</button>
+        <button type="submit" class="btn-primary" id="saveBorrowBtn">Ghi nhận</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/borrows.js"></script>
+<script src="../js/books.js"></script>
+<script src="../js/members.js"></script>
+<script>
+  requireAuth(['Admin', 'Employee']);
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AuthApi.logout();
+    window.location.href = 'login.html';
+  });
+
+  const tbody = document.getElementById('borrowsTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const modalOverlay = document.getElementById('borrowModalOverlay');
+  const modalError = document.getElementById('modalError');
+  const borrowForm = document.getElementById('borrowForm');
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('vi-VN');
+  }
+
+  function statusPill(b) {
+    if (b.status === 'Returned') return '<span class="pill returned">Đã trả</span>';
+    if (b.isOverdue) return '<span class="pill overdue">Quá hạn</span>';
+    return '<span class="pill borrowed">Đang mượn</span>';
+  }
+
+  async function loadBorrows() {
+    try {
+      const borrows = await BorrowsApi.getAll();
+      tbody.innerHTML = '';
+      emptyState.style.display = borrows.length ? 'none' : 'block';
+      borrows.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${b.bookTitle}</b><br><span style="color:var(--outline);font-size:12px;">${b.bookCode}</span></td>
+          <td>${b.memberFullName}<br><span style="color:var(--outline);font-size:12px;">${b.memberPhoneNumber}</span></td>
+          <td>${fmtDate(b.borrowDate)}</td>
+          <td>${fmtDate(b.dueDate)}</td>
+          <td>${statusPill(b)}</td>
+          <td>${b.status === 'Borrowed' ? `<button class="btn-outline" data-return="${b.id}">Ghi nhận trả</button>` : '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  tbody.addEventListener('click', async (e) => {
+    const returnId = e.target.getAttribute('data-return');
+    if (!returnId) return;
+    if (!confirm('Xác nhận đã nhận lại sách từ thành viên?')) return;
+    try {
+      await BorrowsApi.returnBook(returnId);
+      showToast('Ghi nhận trả sách thành công');
+      await loadBorrows();
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  });
+
+  async function openBorrowModal() {
+    modalError.classList.remove('show');
+    borrowForm.reset();
+    try {
+      const [books, members] = await Promise.all([BooksApi.getAll(), MembersAdminApi.getAll()]);
+      const availableBooks = books.filter(b => b.totalCopies > 0);
+      const activeMembers = members.filter(m => m.isActive);
+
+      document.getElementById('bookSelect').innerHTML = availableBooks.length
+        ? availableBooks.map(b => `<option value="${b.id}">${b.title} (còn ${b.totalCopies})</option>`).join('')
+        : '<option value="">Không có sách khả dụng</option>';
+
+      document.getElementById('memberSelect').innerHTML = activeMembers.length
+        ? activeMembers.map(m => `<option value="${m.id}">${m.fullName} - ${m.phoneNumber}</option>`).join('')
+        : '<option value="">Không có thành viên hoạt động</option>';
+
+      modalOverlay.classList.add('show');
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  document.getElementById('newBorrowBtn').addEventListener('click', openBorrowModal);
+  document.getElementById('cancelBorrowBtn').addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+  });
+
+  borrowForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    modalError.classList.remove('show');
+    const bookId = document.getElementById('bookSelect').value;
+    const memberId = document.getElementById('memberSelect').value;
+
+    if (!bookId || !memberId) {
+      modalError.textContent = 'Vui lòng chọn đầy đủ sách và thành viên.';
+      modalError.classList.add('show');
+      return;
+    }
+
+    const saveBtn = document.getElementById('saveBorrowBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Đang ghi nhận...';
+
+    try {
+      await BorrowsApi.create(bookId, memberId);
+      modalOverlay.classList.remove('show');
+      showToast('Ghi nhận mượn sách thành công');
+      await loadBorrows();
+    } catch (err) {
+      modalError.textContent = err.message;
+      modalError.classList.add('show');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Ghi nhận';
+    }
+  });
+
+  loadBorrows();
+</script>
+</body>
+</html>
