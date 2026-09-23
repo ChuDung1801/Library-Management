@@ -1,92 +1,85 @@
-# Scholaris Library — Library Management System
+# Scholaris Library — Hệ thống quản lý thư viện
 
-Hệ thống quản lý thư viện (.NET 10 + MongoDB + HTML/CSS/JS thuần).
-Cấu trúc thư mục theo `FolderContruct.md`, nghiệp vụ theo `SKILL_LM.md`.
+## Giới thiệu
 
-## Trạng thái: Sprint 1 hoàn thành — Epic 01: Account Management
+Scholaris Library là hệ thống quản lý thư viện giúp quản trị viên quản lý sách, thể loại,
+thành viên và toàn bộ nghiệp vụ mượn/trả sách; đồng thời cho phép thành viên và khách truy
+cập tìm kiếm, xem thông tin sách và theo dõi việc mượn sách của mình.
 
-| User Story | Trạng thái |
+**Product Goal:** Xây dựng hệ thống quản lý thư viện giúp quản lý sách, thành viên và hoạt
+động mượn/trả một cách hiệu quả, đồng thời hỗ trợ thành viên và khách hàng dễ dàng tìm kiếm
+và theo dõi thông tin sách.
+
+## Đối tượng sử dụng
+
+| Vai trò | Quyền hạn chính |
 |---|---|
-| SCRUM-16 Thành viên tạo tài khoản | ✅ `POST /api/auth/register` |
-| SCRUM-29 Thành viên đăng nhập | ✅ `POST /api/auth/login` |
-| SCRUM-30 Thành viên cập nhật thông tin cá nhân | ✅ `GET/PUT /api/members/me` |
-| SCRUM-31 Khách tạo tài khoản | ✅ dùng chung endpoint register (tạo role Member) |
+| **Admin** | Toàn quyền: quản lý sách, thể loại, thành viên, ghi nhận mượn/trả, duyệt yêu cầu mượn, xem lịch sử & sách quá hạn |
+| **Employee** (nhân viên) | Giống Admin ở các nghiệp vụ vận hành hằng ngày (sách, mượn/trả, thành viên) |
+| **Member** (thành viên) | Tìm kiếm/xem sách, tự cập nhật hồ sơ, xem sách đang mượn & lịch sử mượn của mình, gửi yêu cầu mượn sách |
+| **Guest** (khách) | Tìm kiếm/xem sách công khai, đăng ký tài khoản để trở thành Member |
 
-Sprint 2 trở đi (Book Management, Category, Member list quản trị, Borrow/Return, History...)
-sẽ được triển khai khi bạn yêu cầu tiếp — **chưa động vào phạm vi này** theo đúng nguyên tắc
-"bám sát Product Backlog, tránh Scope Creep" trong `SKILL_LM.md`.
+## Kiến trúc hệ thống
 
----
-
-## 1. Yêu cầu môi trường
-
-- .NET 10 SDK
-- MongoDB chạy tại `mongodb://localhost:27017` (mặc định, có thể đổi trong `appsettings.json`)
-
-## 2. Chạy Backend
-
-```bash
-cd backend/LibraryManagement.API
-dotnet restore   # cần internet để tải NuGet packages (MongoDB.Driver, JwtBearer, Swashbuckle...)
-dotnet run
+```
+Frontend (HTML/CSS/JS thuần)
+        ↓ REST API (JWT Bearer)
+API (Controllers, DTOs)
+        ↓
+Application (Services, business rules, validation)
+        ↓
+Infrastructure (Repositories, MongoDB)
+        ↓
+Domain (Entities, Enums, Exceptions - không phụ thuộc tầng nào khác)
 ```
 
-API chạy tại `http://localhost:5000`, Swagger UI tại `http://localhost:5000/swagger`.
+Kiến trúc nhiều tầng (Clean Architecture rút gọn), tách biệt rõ Frontend – Backend –
+Database, ưu tiên đơn giản, dễ bảo trì cho nhóm phát triển nhỏ.
 
-> **Lưu ý:** dự án được viết trong môi trường sandbox không có quyền truy cập `nuget.org`
-> nên chưa build/verify được. Nếu `dotnet restore` báo lỗi version package không tồn tại
-> (MongoDB.Driver, Microsoft.IdentityModel.Tokens, Swashbuckle.AspNetCore...), hãy đổi sang
-> version mới nhất hiện có bằng `dotnet add package <TênGói>`.
+## Công nghệ sử dụng
 
-Khi chạy lần đầu, `SeedDataService` sẽ tự động nạp 6 tài khoản mẫu từ `users.json` vào MongoDB
-(chỉ chạy nếu collection `Users` đang rỗng):
+- **Backend:** .NET 10 Web API, MongoDB.Driver, JWT Bearer Authentication
+- **Database:** MongoDB
+- **Frontend:** HTML/CSS/JavaScript thuần (không dùng framework), gọi API qua `fetch`
+- **Mật khẩu:** băm bằng PBKDF2 (built-in .NET, không phụ thuộc thư viện ngoài)
 
-| Tài khoản đăng nhập | Mật khẩu | Vai trò |
-|---|---|---|
-| admin | admin123 | Admin |
-| employee01 / employee02 | employee123 | Employee |
-| minhanh.pham / baohg / hadothu | user123 | Member |
+## Chức năng theo Epic
 
-## 3. Chạy Frontend
+### Epic 01 — Account Management
+Đăng ký tài khoản (Member/Guest), đăng nhập, cập nhật thông tin cá nhân.
 
-Frontend là HTML/CSS/JS thuần, không cần build. Mở bằng một static server bất kỳ (Live Server,
-`python -m http.server`, ...) tại thư mục `frontend/library-management-web`, ví dụ:
+### Epic 02 — Book Management
+Thêm/sửa/xóa/xem danh sách sách, thêm thể loại sách (chỉ Admin/Employee).
 
-```bash
-cd frontend/library-management-web
-python3 -m http.server 5500
-```
+### Epic — Search & View Books
+Tìm kiếm sách (Admin, Member), xem chi tiết & tình trạng sách (Member),
+xem danh sách sách công khai không cần đăng nhập (Guest).
 
-Sau đó mở `http://localhost:5500/pages/login.html`.
+### Epic 04 — Borrow & Return
+Ghi nhận mượn sách, ghi nhận trả sách, xem danh sách sách quá hạn (Admin/Employee).
+Quy tắc: một sách mượn tối đa 1 tháng.
 
-- `pages/login.html` — đăng nhập (SCRUM-29)
-- `pages/register.html` — tạo tài khoản (SCRUM-16 / SCRUM-31)
-- `pages/profile.html` — xem & cập nhật thông tin cá nhân (SCRUM-30)
-- `pages/home.html` — dashboard quản trị (Admin/Employee), giữ nguyên UI demo gốc, Sprint 2+ sẽ nối dữ liệu thật
+### Epic — Member Management (Admin)
+Xem danh sách tài khoản thành viên, cập nhật thông tin thành viên, kích hoạt/vô hiệu hóa
+tài khoản.
 
-`js/api.js` mặc định gọi API tại `http://localhost:5000/api` — đổi `API_BASE_URL` nếu backend
-chạy ở cổng khác.
+### Epic 05 — History Tracking & Book Borrowing Requests
+Admin xem lịch sử mượn sách (toàn bộ hoặc theo từng thành viên); Member xem lịch sử và
+sách đang mượn của chính mình; Member gửi yêu cầu mượn sách để Admin duyệt/từ chối.
 
-## 4. Test nhanh bằng curl
+## Cấu trúc dữ liệu chính
 
-```bash
-# Đăng ký
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"fullName":"Nguyen Van A","email":"a@example.com","password":"123456","phoneNumber":"0912345678"}'
+- **User** — tài khoản (Admin/Employee/Member), có trạng thái kích hoạt riêng
+- **Book** — sách (mã sách, tên, tác giả, nhà xuất bản, năm XB, số lượng, trạng thái)
+- **Category** — thể loại sách
+- **Borrow** — phiếu mượn (ngày mượn, hạn trả, ngày trả thực tế, trạng thái)
+- **BorrowRequest** — yêu cầu mượn sách do Member gửi, chờ Admin duyệt
 
-# Đăng nhập
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"usernameOrEmail":"admin","password":"admin123"}'
+## Nguyên tắc thiết kế
 
-# Xem hồ sơ (thay TOKEN bằng token trả về ở bước login)
-curl http://localhost:5000/api/members/me -H "Authorization: Bearer TOKEN"
-```
-
-## 5. Test Case đã chuẩn bị (xem chi tiết trong `docs/test-cases/`)
-
-- **Positive:** đăng ký/đăng nhập/cập nhật với dữ liệu hợp lệ → thành công.
-- **Negative:** thiếu trường bắt buộc, email sai định dạng, trùng email/username, sai mật khẩu.
-- **Boundary:** tên 50 ký tự (hợp lệ) / 51 ký tự (từ chối), mật khẩu 6 ký tự (hợp lệ) / 5 ký tự (từ chối).
-- **Permission:** gọi `GET/PUT /api/members/me` không kèm token → 401 Unauthorized.
+- Bám sát Product Backlog, không tự ý mở rộng phạm vi (tránh Scope Creep)
+- Ưu tiên Must Have trước Should/Could Have
+- Kiến trúc và cơ sở dữ liệu vừa đủ, không phức tạp hóa
+- Mọi thao tác nguy hiểm (xóa, vô hiệu hóa tài khoản) đều có xác nhận trước khi thực hiện
+- Một hành vi nghiệp vụ chỉ xử lý ở một nơi duy nhất (ví dụ: duyệt yêu cầu mượn sách tái sử
+  dụng đúng logic ghi nhận mượn sách, không viết lại)
